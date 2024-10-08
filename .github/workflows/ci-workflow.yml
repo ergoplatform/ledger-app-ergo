@@ -4,13 +4,11 @@ on: [push, pull_request]
 
 jobs:
   job_build_nano_debug:
-    name: Build application for NanoS, X and S+
+    name: Build application for NanoS+, X
     runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
-          - SDK: "$NANOS_SDK"
-            artifact: ergo-app-debug-nanos
           - SDK: "$NANOX_SDK"
             artifact: ergo-app-debug-nanox
           - SDK: "$NANOSP_SDK"
@@ -128,12 +126,10 @@ jobs:
     strategy: 
       matrix:
         include:
-          - model: nanos
-            SDK: "2.1"
           # - model: nanox
           #   SDK: "2.0.2"
-          # - model: nanosp
-          #   SDK: "1.0.4"
+          - model: nanosp
+            SDK: "1.0.4"
     
     needs: job_build_nano_debug
     runs-on: ubuntu-latest
