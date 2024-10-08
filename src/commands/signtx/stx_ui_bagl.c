@@ -1,3 +1,5 @@
+#ifdef HAVE_BAGL
+
 #include <os.h>
 #include <ux.h>
 #include <glyphs.h>
@@ -403,3 +405,5 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
 bool ui_stx_display_screens(uint8_t screen_count) {
     return ui_display_screens(&screen_count);
 }
+
+#endif

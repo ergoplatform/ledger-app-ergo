@@ -1,3 +1,5 @@
+#ifdef HAVE_BAGL
+
 #include "ui_dynamic_flow.h"
 
 #include "../constants.h"
@@ -107,3 +109,5 @@ bool ui_add_dynamic_flow_screens(uint8_t *screen,
 
     return true;
 }
+
+#endif

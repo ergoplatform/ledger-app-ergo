@@ -1,41 +1,8 @@
-#include <os.h>
-#include <ux.h>
-#include <string.h>
-#include <glyphs.h>
+#ifdef HAVE_NBGL
 
 #include "epk_ui.h"
-#include "epk_response.h"
-#include "../../context.h"
-#include "../../sw.h"
-#include "../../common/bip32_ext.h"
-#include "../../common/macros_ext.h"
 #include "../../helpers/response.h"
-#include "../../ui/ui_bip32_path.h"
-#include "../../ui/ui_application_id.h"
-#include "../../ui/ui_approve_reject.h"
-#include "../../ui/ui_menu.h"
-#include "../../ui/ui_main.h"
-
-// Step with icon and text
-UX_STEP_NOCB(ux_epk_display_confirm_ext_pubkey_step, pn, {&C_icon_warning, "Ext PubKey Export"});
-
-static NOINLINE void ui_action_get_extended_pubkey(bool approved, void* context) {
-    extended_public_key_ctx_t* ctx = (extended_public_key_ctx_t*) context;
-    app_set_ui_busy(false);
-
-    if (approved) {
-        app_set_connected_app_id(ctx->app_token_value);
-        send_response_extended_pubkey(ctx->raw_public_key, ctx->chain_code);
-        explicit_bzero(ctx, sizeof(extended_public_key_ctx_t));
-    } else {
-        explicit_bzero(ctx, sizeof(extended_public_key_ctx_t));
-        res_deny();
-    }
-
-    app_set_current_command(CMD_NONE);
-
-    ui_menu_main();
-}
+#include "../../sw.h"
 
 int ui_display_account(extended_public_key_ctx_t* ctx,
                        uint32_t app_access_token,
@@ -52,6 +19,7 @@ int ui_display_account(extended_public_key_ctx_t* ctx,
     }
 
     uint8_t screen = 0;
+    UX_STEP_NOCB(ux_epk_display_confirm_ext_pubkey_step, pn, {&C_icon_warning, "Ext PubKey Export"});
     ui_add_screen(&ux_epk_display_confirm_ext_pubkey_step, &screen);
 
     const ux_flow_step_t* b32_step =
@@ -85,3 +53,5 @@ int ui_display_account(extended_public_key_ctx_t* ctx,
 
     return 0;
 }
+
+#endif

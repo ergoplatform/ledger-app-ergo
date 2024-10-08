@@ -1,3 +1,5 @@
+#ifdef HAVE_BAGL
+
 #include "ui_bip32_path.h"
 #include "../common/bip32_ext.h"
 
@@ -43,3 +45,5 @@ const ux_flow_step_t* ui_bip32_path_screen(uint32_t* path,
     G_ui_bip32_approve_callback_context = cb_context;
     return &ux_bip32_path_step;
 }
+
+#endif

@@ -4,7 +4,11 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+
+#ifdef HAVE_BAGL
+
 typedef uint16_t (*ui_dynamic_flow_show_screen_cb)(uint8_t, char *, char *, void *);
+#endif
 
 // Global context pointer will be set to the dynamic flow context. Don't change it.
 bool ui_add_dynamic_flow_screens(uint8_t *screen,

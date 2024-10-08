@@ -1,3 +1,5 @@
+#ifdef HAVE_BAGL
+
 #include <os.h>
 #include <ux.h>
 #include <glyphs.h>
@@ -117,3 +119,5 @@ int ui_display_address(derive_address_ctx_t* ctx,
 
     return 0;
 }
+
+#endif

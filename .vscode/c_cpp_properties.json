@@ -13,13 +13,14 @@
                 "${env:ARM_GCC}/lib/gcc/arm-none-eabi/13.2.1/include/*",
                 "${env:BOLOS_SDK}/include/*",
                 "${env:BOLOS_SDK}/lib_ux/include/*",
+                "${env:BOLOS_SDK}/lib_nbgl/include/*",
                 "${env:BOLOS_SDK}/lib_cxng/include/*",
                 "${env:BOLOS_SDK}/lib_standard_app/*"
             ],
             "defines": [
                 "TARGET_NANOS2",
                 "OS_IO_SEPROXYHAL",
-                "HAVE_BAGL",
+                "HAVE_NBGL",
                 "HAVE_ECC",
                 "HAVE_ECC_WEIERSTRASS",
                 "HAVE_SECP_CURVES",
