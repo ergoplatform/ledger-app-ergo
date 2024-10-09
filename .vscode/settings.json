@@ -7,7 +7,7 @@
     "python.terminal.activateEnvironment": false,
     "git.ignoreLimitWarning": true,
     "ledgerDevTools.appSettings": {
-        "selectedUseCase": "release",
+        "selectedUseCase": "debug",
         "selectedDevice": "Stax",
         "selectedVariant": "ergo"
     },

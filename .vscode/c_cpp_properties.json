@@ -21,6 +21,7 @@
                 "TARGET_NANOS2",
                 "OS_IO_SEPROXYHAL",
                 "HAVE_NBGL",
+                "HAVE_SE_TOUCH",
                 "HAVE_ECC",
                 "HAVE_ECC_WEIERSTRASS",
                 "HAVE_SECP_CURVES",
