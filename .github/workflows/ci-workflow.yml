@@ -14,9 +14,9 @@ jobs:
           - SDK: "$NANOSP_SDK"
             artifact: ergo-app-debug-nanosp
           - SDK: "$STAX_SDK"
-            artifact: ergo-app-debug-nanosp
+            artifact: ergo-app-debug-stax
           - SDK: "$FLEX_SDK"
-            artifact: ergo-app-debug-nanosp
+            artifact: ergo-app-debug-flex
 
     container:
       image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder-lite:latest
