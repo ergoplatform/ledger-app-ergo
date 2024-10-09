@@ -331,10 +331,10 @@ static NOINLINE void ui_stx_operation_p2pk_approve_action(void *context) {
 uint16_t ui_stx_operation_p2pk_show_token_and_path(sign_transaction_operation_p2pk_ctx_t *ctx,
                                                    uint32_t app_access_token,
                                                    bool is_known_application,
-                
+
                                                    void *sign_tx_ctx) {
     uint8_t screen = 0;
-    #ifdef HAVE_BAGL
+#ifdef HAVE_BAGL
     const ux_flow_step_t *b32_step = ui_bip32_path_screen(
         ctx->bip32.path,
         ctx->bip32.len,
@@ -347,7 +347,7 @@ uint16_t ui_stx_operation_p2pk_show_token_and_path(sign_transaction_operation_p2
         return SW_BIP32_FORMATTING_FAILED;
     }
     ui_add_screen(b32_step, &screen);
-    #endif
+#endif
 
     if (!ui_stx_add_operation_approve_screens(&ctx->ui_approve.ui_approve,
                                               &screen,

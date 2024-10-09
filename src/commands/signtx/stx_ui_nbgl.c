@@ -15,7 +15,6 @@ bool ui_stx_add_operation_approve_screens(sign_transaction_ui_aprove_ctx_t* ctx,
     return true;
 }
 
-
 bool ui_stx_add_output_screens(sign_transaction_ui_output_confirm_ctx_t* ctx,
                                uint8_t* screen,
                                const sign_transaction_output_info_ctx_t* output,
@@ -23,7 +22,6 @@ bool ui_stx_add_output_screens(sign_transaction_ui_output_confirm_ctx_t* ctx,
                                uint8_t network_id) {
     return true;
 }
-
 
 bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
                                     uint8_t* screen,
@@ -35,14 +33,11 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
     return true;
 }
 
-
 bool ui_stx_display_screens(uint8_t screen_count) {
     return true;
 }
 
-
 void ui_stx_operation_approve_reject(bool approved, sign_transaction_ui_aprove_ctx_t* ctx) {
-
 }
 
 #endif

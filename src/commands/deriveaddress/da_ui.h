@@ -20,7 +20,6 @@ int ui_display_address(derive_address_ctx_t* ctx,
                        uint8_t bip32_path_len,
                        uint8_t raw_address[static P2PK_ADDRESS_LEN]);
 
-
 static inline int send_error(uint16_t err) {
     app_set_current_command(CMD_NONE);
     return res_error(err);

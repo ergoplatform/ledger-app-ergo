@@ -44,17 +44,21 @@ int ui_display_account(extended_public_key_ctx_t* ctx,
         return NULL;
     }
 
-
     if (app_access_token != 0) {
         // TO-DO
-        //ui_add_screen(ui_application_id_screen(app_access_token, ctx->app_token), &screen);
+        // ui_add_screen(ui_application_id_screen(app_access_token, ctx->app_token), &screen);
     }
 
     ctx->app_token_value = app_access_token;
     memmove(ctx->raw_public_key, raw_pub_key, PUBLIC_KEY_LEN);
     memmove(ctx->chain_code, chain_code, CHAIN_CODE_LEN);
 
-    nbgl_useCaseChoice(&WARNING_ICON,"Ext PubKey Export", ctx->bip32_path, "Confirm", "Cancel", ui_display_account_confirm);
+    nbgl_useCaseChoice(&WARNING_ICON,
+                       "Ext PubKey Export",
+                       ctx->bip32_path,
+                       "Confirm",
+                       "Cancel",
+                       ui_display_account_confirm);
     bool approved = io_ui_process();
 
     if (approved) {

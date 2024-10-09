@@ -31,8 +31,7 @@ int ui_display_address(derive_address_ctx_t* ctx,
                        uint32_t app_access_token,
                        uint32_t* bip32_path,
                        uint8_t bip32_path_len,
-                       uint8_t raw_address[static P2PK_ADDRESS_LEN])
-{
+                       uint8_t raw_address[static P2PK_ADDRESS_LEN]) {
     if (!bip32_path_validate(bip32_path,
                              bip32_path_len,
                              BIP32_HARDENED(44),
@@ -44,7 +43,6 @@ int ui_display_address(derive_address_ctx_t* ctx,
     ctx->app_token_value = app_access_token;
     ctx->send = send;
 
-
     memset(ctx->address, 0, MEMBER_SIZE(derive_address_ctx_t, address));
     if (!send) {
         int result = base58_encode(raw_address,
@@ -55,25 +53,33 @@ int ui_display_address(derive_address_ctx_t* ctx,
         if (result == -1 || result >= P2PK_ADDRESS_STRING_MAX_LEN) {
             return send_error(SW_ADDRESS_FORMATTING_FAILED);
         }
-        
     }
 
     if (app_access_token != 0) {
         // TO-DO
-        //ui_add_screen(ui_application_id_screen(app_access_token, ctx->app_id), &screen);
+        // ui_add_screen(ui_application_id_screen(app_access_token, ctx->app_id), &screen);
     }
 
-    if(send) {
+    if (send) {
         // Confirm Send Address
-        nbgl_useCaseAddressReview(ctx->address, NULL, &WHEEL_ICON, "Confirm Send Address", "", ui_display_address_confirm);
+        nbgl_useCaseAddressReview(ctx->address,
+                                  NULL,
+                                  &WHEEL_ICON,
+                                  "Confirm Send Address",
+                                  "",
+                                  ui_display_address_confirm);
     } else {
         // Confirm Address
-        nbgl_useCaseAddressReview(ctx->address, NULL, &INFO_I_ICON, "Confirm Address", "", ui_display_address_confirm);
+        nbgl_useCaseAddressReview(ctx->address,
+                                  NULL,
+                                  &INFO_I_ICON,
+                                  "Confirm Address",
+                                  "",
+                                  ui_display_address_confirm);
     }
 
     memmove(ctx->raw_address, raw_address, P2PK_ADDRESS_LEN);
 
-   
     bool approved = io_ui_process();
 
     if (approved) {

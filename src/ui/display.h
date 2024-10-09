@@ -13,7 +13,7 @@ static void set_flow_reseponse(bool response) {
 
 static bool io_ui_process() {
     // We are not waiting for the client's input, nor we are doing computations on the device
-    //io_clear_processing_timeout();
+    // io_clear_processing_timeout();
 
     app_set_ui_busy(true);
 
@@ -25,7 +25,7 @@ static bool io_ui_process() {
     } while (io_seproxyhal_spi_is_status_sent() && G_app_context.is_ui_busy);
 
     // We're back at work, we want to show the "Processing..." screen when appropriate
-    //io_start_processing_timeout();
+    // io_start_processing_timeout();
 
     return flow_response;
 }

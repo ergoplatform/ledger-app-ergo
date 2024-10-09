@@ -2,5 +2,4 @@
 
 #include "ui_bip32_path.h"
 
-
 #endif

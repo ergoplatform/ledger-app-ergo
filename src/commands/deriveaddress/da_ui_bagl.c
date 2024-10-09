@@ -51,7 +51,6 @@ static NOINLINE void ui_action_derive_address(bool approved, void* context) {
     ui_menu_main();
 }
 
-
 // Display
 int ui_display_address(derive_address_ctx_t* ctx,
                        bool send,

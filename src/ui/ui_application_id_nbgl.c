@@ -2,5 +2,4 @@
 
 #include "ui_application_id.h"
 
-
 #endif

@@ -4,7 +4,7 @@
 #include <ux.h>
 #include <nbgl_use_case.h>
 
-#define APPTAGLINE "Ergo app for ledger"
+#define APPTAGLINE   "Ergo app for ledger"
 #define APPCOPYRIGHT "Ergo App (c) 2024"
 
 #define SETTING_INFO_NB 2
@@ -22,7 +22,7 @@ void app_quit(void) {
 }
 
 void ui_menu_main() {
-     nbgl_useCaseHomeAndSettings(APPNAME,
+    nbgl_useCaseHomeAndSettings(APPNAME,
                                 &C_app_logo_64px,
                                 APPTAGLINE,
                                 INIT_HOME_PAGE,
@@ -33,7 +33,6 @@ void ui_menu_main() {
 }
 
 void ui_menu_about() {
-
 }
 
 #endif
