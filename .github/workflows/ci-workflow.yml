@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   job_build_nano_debug:
-    name: Build application for NanoS+, X
+    name: Build application for NanoS+, X, Stax, Flex
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -12,6 +12,10 @@ jobs:
           - SDK: "$NANOX_SDK"
             artifact: ergo-app-debug-nanox
           - SDK: "$NANOSP_SDK"
+            artifact: ergo-app-debug-nanosp
+          - SDK: "$STAX_SDK"
+            artifact: ergo-app-debug-nanosp
+          - SDK: "$FLEX_SDK"
             artifact: ergo-app-debug-nanosp
 
     container:
@@ -126,10 +130,14 @@ jobs:
     strategy: 
       matrix:
         include:
-          # - model: nanox
-          #   SDK: "2.0.2"
+          - model: nanox
+            SDK: "2.0.2"
           - model: nanosp
             SDK: "1.0.4"
+          - model: stax
+            SDK: "2.0"
+          - model: flex
+            SDK: "2.0"
     
     needs: job_build_nano_debug
     runs-on: ubuntu-latest
@@ -157,6 +165,7 @@ jobs:
           curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
           apt-get install -qy nodejs
           export SEED=`cat tests/seed.txt`
+          python /speculos/speculos.py bin/app.elf --apdu-port 9999 --api-port 5000 --display headless --model=${{ matrix.model }} --sdk=${{ matrix.SDK }} --seed "${SEED}"
           nohup bash -c "python /speculos/speculos.py bin/app.elf --apdu-port 9999 --api-port 5000 --display headless --model=${{ matrix.model }} --sdk=${{ matrix.SDK }} --seed \"${SEED}\"" > speculos.log 2<&1 &
           cd tests && npm install
           until `nc -w5 -z -v 127.0.0.1 9999`; do sleep 1; done;
