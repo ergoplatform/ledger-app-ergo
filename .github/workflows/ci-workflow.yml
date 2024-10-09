@@ -131,13 +131,9 @@ jobs:
       matrix:
         include:
           - model: nanox
-            SDK: "2.0.2"
           - model: nanosp
-            SDK: "1.0.4"
           - model: stax
-            SDK: "2.0"
           - model: flex
-            SDK: "2.0"
     
     needs: job_build_nano_debug
     runs-on: ubuntu-latest
@@ -165,8 +161,8 @@ jobs:
           curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
           apt-get install -qy nodejs
           export SEED=`cat tests/seed.txt`
-          python /speculos/speculos.py bin/app.elf --apdu-port 9999 --api-port 5000 --display headless --model=${{ matrix.model }} --sdk=${{ matrix.SDK }} --seed "${SEED}"
-          nohup bash -c "python /speculos/speculos.py bin/app.elf --apdu-port 9999 --api-port 5000 --display headless --model=${{ matrix.model }} --sdk=${{ matrix.SDK }} --seed \"${SEED}\"" > speculos.log 2<&1 &
+          python /speculos/speculos.py bin/app.elf --apdu-port 9999 --api-port 5000 --display headless --model=${{ matrix.model }} --seed "${SEED}"
+          nohup bash -c "python /speculos/speculos.py bin/app.elf --apdu-port 9999 --api-port 5000 --display headless --model=${{ matrix.model }} --seed \"${SEED}\"" > speculos.log 2<&1 &
           cd tests && npm install
           until `nc -w5 -z -v 127.0.0.1 9999`; do sleep 1; done;
           npm --model=${{matrix.model}} --port=5000 run test
