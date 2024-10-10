@@ -29,3 +29,10 @@ static bool io_ui_process() {
 
     return flow_response;
 }
+
+#if HAVE_NBGL
+#define N_UX_PAIRS 13
+
+static nbgl_layoutTagValue_t pairs[N_UX_PAIRS];
+static nbgl_layoutTagValueList_t pairList;
+#endif

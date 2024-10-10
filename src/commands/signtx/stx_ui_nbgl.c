@@ -262,7 +262,7 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
                                     ui_sign_transaction_operation_show_screen_cb screen_cb,
                                     ui_sign_transaction_operation_send_response_cb response_cb,
                                     void* cb_context) {
-    if (MAX_NUMBER_OF_SCREENS - *screen < 6) return false;
+    /*if (MAX_NUMBER_OF_SCREENS - *screen < 6) return false;
 
     memset(ctx, 0, sizeof(sign_transaction_ui_sign_confirm_ctx_t));
 
@@ -300,7 +300,7 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
     ctx->op_screen_cb = screen_cb;
     ctx->op_response_cb = response_cb;
     ctx->op_cb_context = cb_context;
-    ctx->amounts = amounts;
+    ctx->amounts = amounts;*/
     
     return true;
 }

@@ -1,7 +1,8 @@
 {
     "files.associations": {
         "*.h": "c",
-        "format": "c"
+        "format": "c",
+        "cstdint": "c"
     },
     "editor.formatOnSave": false,
     "python.terminal.activateEnvironment": false,

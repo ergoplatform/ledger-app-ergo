@@ -27,17 +27,30 @@ void ui_action_attest_input(bool approved) {
 int ui_display_access_token(uint32_t app_access_token, attest_input_ctx_t* context) {
     context->ui.app_token_value = app_access_token;
 
+    pairList.nbMaxLinesForValue = 2;
+
+    int n_pairs = 0;
+
+    pairs[n_pairs++] = (nbgl_layoutTagValue_t){
+            .item = "Confirm Attest Input",
+            .value = ""};
+
+    pairs[n_pairs].item = "test";
+    pairs[n_pairs].value = "test2";
+    n_pairs++;
+
+    pairs[n_pairs].item = "nest";
+    pairs[n_pairs].value = "nest2";
+    n_pairs++;
+
     if (app_access_token != 0) {
-        // TO-DO
-        //ui_add_screen(ui_application_id_screen(app_access_token, context->ui.app_token), &screen);
+        pairs[n_pairs++] = ui_application_id_screen(app_access_token, context->ui.app_token);
     }
 
-    nbgl_useCaseChoice(&VALIDATE_ICON,
-                       "Confirm Attest Input",
-                       "",
-                       "Confirm",
-                       "Cancel",
-                       ui_action_attest_input);
+    pairList.nbPairs = n_pairs;
+    pairList.pairs = pairs;
+
+	nbgl_useCaseReview(TYPE_OPERATION, &pairList, &C_round_warning_64px, "Confirm Attest Input", NULL, "Confirm Attest Input", ui_action_attest_input);
     bool approved = io_ui_process();
 
     if (approved) {
