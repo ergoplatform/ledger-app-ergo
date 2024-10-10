@@ -76,12 +76,12 @@ describe("Transaction Tests", function () {
                 expect(attestedBox.frames).to.have.length(1);
                 const frame = attestedBox.frames[0];
                 expect(frame.boxId).to.exist;
-                expect(frame.framesCount).to.be.equal(1);
-                expect(frame.frameIndex).to.be.equal(0);
+                expect(frame.count).to.be.equal(1);
+                expect(frame.index).to.be.equal(0);
                 expect(frame.amount).to.be.equal('1000000000');
                 expect(frame.tokens).to.be.empty;
                 expect(frame.attestation).to.exist;
-                expect(frame.buffer).to.exist;
+                expect(frame.bytes).to.exist;
             })
             .run(({test, unsignedBox}) => test.device.attestInput(unsignedBox));
 

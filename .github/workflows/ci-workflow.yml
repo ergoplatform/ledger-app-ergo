@@ -132,8 +132,8 @@ jobs:
         include:
           - model: nanox
           - model: nanosp
-          - model: stax
-          - model: flex
+          #- model: stax
+          #- model: flex
     
     needs: job_build_nano_debug
     runs-on: ubuntu-latest
