@@ -35,4 +35,9 @@ static bool io_ui_process() {
 
 static nbgl_layoutTagValue_t pairs[N_UX_PAIRS];
 static nbgl_layoutTagValueList_t pairList;
+
+extern nbgl_layoutTagValue_t pairs_global[N_UX_PAIRS];
+
+static char pair_mem_title[N_UX_PAIRS][20];
+static char pair_mem_text[N_UX_PAIRS][70];
 #endif

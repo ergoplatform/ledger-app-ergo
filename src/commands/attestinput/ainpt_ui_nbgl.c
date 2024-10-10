@@ -20,6 +20,9 @@
 #include "../../ui/display.h"
 #include <os_print.h>
 
+#define APPLICATION_ID_SUBLEN APPLICATION_ID_STR_LEN + 13
+static char sub_message[APPLICATION_ID_SUBLEN];
+
 void ui_action_attest_input(bool approved) {
     set_flow_reseponse(approved);
 }
@@ -27,42 +30,30 @@ void ui_action_attest_input(bool approved) {
 int ui_display_access_token(uint32_t app_access_token, attest_input_ctx_t* context) {
     context->ui.app_token_value = app_access_token;
 
-    pairList.nbMaxLinesForValue = 2;
-
-    int n_pairs = 0;
-
-    pairs[n_pairs++] = (nbgl_layoutTagValue_t){
-            .item = "Confirm Attest Input",
-            .value = ""};
-
-    pairs[n_pairs].item = "test";
-    pairs[n_pairs].value = "test2";
-    n_pairs++;
-
-    pairs[n_pairs].item = "nest";
-    pairs[n_pairs].value = "nest2";
-    n_pairs++;
-
     if (app_access_token != 0) {
-        pairs[n_pairs++] = ui_application_id_screen(app_access_token, context->ui.app_token);
+        ui_application_id_screen(app_access_token, context->ui.app_token);
+        memset(sub_message, 0, APPLICATION_ID_SUBLEN);
+        snprintf(sub_message, APPLICATION_ID_SUBLEN, "Application: 0x%08x", app_access_token);
     }
 
-    pairList.nbPairs = n_pairs;
-    pairList.pairs = pairs;
-
-	nbgl_useCaseReview(TYPE_OPERATION, &pairList, &C_round_warning_64px, "Confirm Attest Input", NULL, "Confirm Attest Input", ui_action_attest_input);
+    nbgl_useCaseReviewStreamingStart(TYPE_TRANSACTION,
+                                     &VALIDATE_ICON,
+                                     "Confirm Attest Input",
+                                     sub_message,
+                                     ui_action_attest_input);
     bool approved = io_ui_process();
 
     if (approved) {
         app_set_connected_app_id(context->ui.app_token_value);
         context->state = ATTEST_INPUT_STATE_APPROVED;
         send_response_attested_input_session_id(context->session);
+
     } else {
         app_set_current_command(CMD_NONE);
         res_deny();
-    }
 
-    ui_menu_main();
+        ui_menu_main();
+    }
 
     return 0;
 }
