@@ -406,4 +406,22 @@ bool ui_stx_display_screens(uint8_t screen_count) {
     return ui_display_screens(&screen_count);
 }
 
+void ui_stx_finilize_tx(sign_transaction_ui_aprove_ctx_t* ctx,
+                        uint32_t app_access_token,
+                        bool is_known_application,
+                        sign_transaction_ctx_t* sign_tx) {
+}
+void ui_stx_finilize_2nd_tx(sign_transaction_ui_output_confirm_ctx_t* ctx,
+                            const sign_transaction_output_info_ctx_t* output,
+                            sign_transaction_bip32_path_t* last_approved_change,
+                            uint8_t network_id) {
+}
+void ui_stx_finilize_3rd_tx(sign_transaction_ui_sign_confirm_ctx_t* ctx,
+                            const sign_transaction_amounts_ctx_t* amounts,
+                            uint8_t op_screen_count,
+                            ui_sign_transaction_operation_show_screen_cb screen_cb,
+                            ui_sign_transaction_operation_send_response_cb response_cb,
+                            void* cb_context) {
+}
+
 #endif
