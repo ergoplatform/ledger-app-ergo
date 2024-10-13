@@ -9,6 +9,7 @@
 #include <string.h>
 #include <glyphs.h>
 #include "epk_response.h"
+#include "ainpt_response.h"
 #include "../../context.h"
 #include "../../common/bip32_ext.h"
 #include "../../common/macros_ext.h"
@@ -36,11 +37,12 @@ int ui_display_access_token(uint32_t app_access_token, attest_input_ctx_t* conte
         snprintf(sub_message, APPLICATION_ID_SUBLEN, "Application: 0x%08x", app_access_token);
     }
 
-    nbgl_useCaseConfirm("Confirm Attest Input",
-                        sub_message,
-                        "Confirm",
-                        "Reject",
-                        ui_action_attest_input);
+    nbgl_useCaseChoice(&VALIDATE_ICON,
+                       "Confirm Attest Input",
+                       sub_message,
+                       "Confirm",
+                       "Reject",
+                       ui_action_attest_input);
     bool approved = io_ui_process();
 
     if (approved) {

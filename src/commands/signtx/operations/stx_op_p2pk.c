@@ -11,6 +11,7 @@
 #include "../stx_ui.h"
 #include "../../../ui/ui_main.h"
 #include "../../../ui/display.h"
+#include "../../../ui/ui_menu.h"
 
 #define COMMAND_ERROR_HANDLER handler_err
 #include "../../../helpers/cmd_macros.h"
@@ -358,7 +359,6 @@ uint16_t ui_stx_operation_p2pk_show_token_and_path(sign_transaction_operation_p2
     bool res = ui_bip32_path_screen(
         ctx->bip32.path,
         ctx->bip32.len,
-        "P2PK Signing",
         ctx->ui_approve.bip32_path,
         MEMBER_SIZE(sign_transaction_operation_p2pk_ui_approve_data_ctx_t, bip32_path));
     if (!res) {
@@ -387,9 +387,11 @@ uint16_t ui_stx_operation_p2pk_show_token_and_path(sign_transaction_operation_p2
                                               sign_tx_ctx)) {
         return SW_SCREENS_BUFFER_OVERFLOW;
     }
+#ifdef HAVE_BAGL
     if (!ui_stx_display_screens(screen)) {
         return SW_SCREENS_BUFFER_OVERFLOW;
     }
+#endif
     return SW_OK;
 }
 
@@ -407,9 +409,11 @@ uint16_t ui_stx_operation_p2pk_show_output_confirm_screen(
                                    ctx->network_id)) {
         return SW_SCREENS_BUFFER_OVERFLOW;
     }
+#ifdef HAVE_BAGL
     if (!ui_stx_display_screens(screen)) {
         return SW_SCREENS_BUFFER_OVERFLOW;
     }
+#endif
     return SW_OK;
 }
 
@@ -476,8 +480,10 @@ uint16_t ui_stx_operation_p2pk_show_confirm_screen(sign_transaction_operation_p2
                                         (void *) ctx)) {
         return SW_SCREENS_BUFFER_OVERFLOW;
     }
+#ifdef HAVE_BAGL
     if (!ui_stx_display_screens(screen)) {
         return SW_SCREENS_BUFFER_OVERFLOW;
     }
+#endif
     return SW_OK;
 }

@@ -41,7 +41,7 @@ int ui_display_account(extended_public_key_ctx_t* ctx,
     uint path_size = MEMBER_SIZE(extended_public_key_ctx_t, bip32_path);
     memset(ctx->bip32_path, 0, path_size);
     if (!bip32_path_format(bip32_path, bip32_path_len, ctx->bip32_path, path_size)) {
-        return NULL;
+        return res_error(SW_BIP32_BAD_PATH);
     }
 
     if (app_access_token != 0) {

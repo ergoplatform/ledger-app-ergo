@@ -8,7 +8,10 @@
 #include <os.h>
 #include <string.h>
 #include <glyphs.h>
-#include "epk_response.h"
+#include <format.h>
+#include <base58.h>
+
+#include "stx_response.h"
 #include "../../context.h"
 #include "../../common/bip32_ext.h"
 #include "../../common/macros_ext.h"
@@ -399,10 +402,6 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
     app_set_current_command(CMD_NONE);
     ui_menu_main();
 
-    return true;
-}
-
-bool ui_stx_display_screens(uint8_t screen_count) {
     return true;
 }
 
