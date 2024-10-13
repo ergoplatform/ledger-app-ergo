@@ -8,7 +8,7 @@
             "name": "Nano S+",
             "includePath": [
                 "${workspaceFolder}/src",
-                "${workspaceFolder}/build/nanos/gen_src",
+                "${workspaceFolder}/build/stax/gen_src",
                 "${env:ARM_GCC}/arm-none-eabi/include/*",
                 "${env:ARM_GCC}/lib/gcc/arm-none-eabi/13.2.1/include/*",
                 "${env:BOLOS_SDK}/include/*",
@@ -52,7 +52,7 @@
                 "PRINTF=screen_printf",
                 "_DEFAULT_SOURCE"
             ],
-            "compilerPath": "${env:ARM_GCC}/bin/arm-none-eabi-gcc",
+            "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "gcc-arm",

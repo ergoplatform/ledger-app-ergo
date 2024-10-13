@@ -1,27 +1,27 @@
 #ifdef HAVE_NBGL
 
-#include "stx_ui.h"
-#include "../../helpers/response.h"
-#include "../../sw.h"
-#include <ux.h>
-#include <nbgl_use_case.h>
 #include <os.h>
+#include <nbgl_use_case.h>
 #include <string.h>
 #include <glyphs.h>
 #include <format.h>
 #include <base58.h>
 
+#include "stx_ui.h"
 #include "stx_response.h"
+
 #include "../../context.h"
 #include "../../common/bip32_ext.h"
 #include "../../common/macros_ext.h"
+#include "../../common/safeint.h"
+#include "../../helpers/response.h"
+#include "../../sw.h"
+#include "../../ergo/address.h"
 #include "../../ui/ui_bip32_path.h"
 #include "../../ui/ui_application_id.h"
-#include "../../ui/ui_approve_reject.h"
 #include "../../ui/ui_menu.h"
 #include "../../ui/ui_main.h"
 #include "../../ui/display.h"
-#include <os_print.h>
 
 #ifdef TARGET_NANOS
 #define ERGO_ID_UI_CHARACTERS_HALF 7

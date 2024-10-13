@@ -1,12 +1,10 @@
 #ifdef HAVE_NBGL
 
-#include "da_ui.h"
 #include <os.h>
-#include <ux.h>
 #include <glyphs.h>
 #include <base58.h>
-#include <ux.h>
 #include <nbgl_use_case.h>
+
 #include "da_ui.h"
 #include "da_response.h"
 #include "da_context.h"

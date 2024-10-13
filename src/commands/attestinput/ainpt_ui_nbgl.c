@@ -1,25 +1,19 @@
 #ifdef HAVE_NBGL
 
-#include "ainpt_ui.h"
-#include "../../helpers/response.h"
-#include "../../sw.h"
-#include <ux.h>
-#include <nbgl_use_case.h>
 #include <os.h>
+#include <nbgl_use_case.h>
 #include <string.h>
 #include <glyphs.h>
-#include "epk_response.h"
+
+#include "ainpt_ui.h"
 #include "ainpt_response.h"
 #include "../../context.h"
-#include "../../common/bip32_ext.h"
 #include "../../common/macros_ext.h"
-#include "../../ui/ui_bip32_path.h"
+#include "../../helpers/response.h"
 #include "../../ui/ui_application_id.h"
-#include "../../ui/ui_approve_reject.h"
 #include "../../ui/ui_menu.h"
 #include "../../ui/ui_main.h"
 #include "../../ui/display.h"
-#include <os_print.h>
 
 #define APPLICATION_ID_SUBLEN APPLICATION_ID_STR_LEN + 13
 static char sub_message[APPLICATION_ID_SUBLEN];

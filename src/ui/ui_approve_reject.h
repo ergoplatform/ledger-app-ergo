@@ -1,9 +1,8 @@
 #pragma once
-
+#ifdef HAVE_BAGL
 #include <stdbool.h>
 #include <ux.h>
 
-#ifdef HAVE_BAGL
 typedef void (*ui_approve_reject_callback)(bool, void*);
 
 void ui_approve_reject_screens(ui_approve_reject_callback cb,

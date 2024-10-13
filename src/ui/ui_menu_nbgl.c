@@ -3,6 +3,7 @@
 #include "ui_menu.h"
 #include <ux.h>
 #include <nbgl_use_case.h>
+#include <os.h>
 
 #define APPTAGLINE   "Ergo app for ledger"
 #define APPCOPYRIGHT "Ergo App (c) 2024"

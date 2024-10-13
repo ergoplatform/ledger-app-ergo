@@ -1,10 +1,8 @@
 #pragma once
-
+#ifdef HAVE_BAGL
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
-
-#ifdef HAVE_BAGL
 
 typedef uint16_t (*ui_dynamic_flow_show_screen_cb)(uint8_t, char *, char *, void *);
 
