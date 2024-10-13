@@ -119,7 +119,8 @@ jobs:
 
       - name: Build with Clang Static Analyzer
         run: |
-          make clean BOLOS_SDK=${{ matrix.SDK }}
+          export BOLOS_SDK=${{ matrix.SDK }}
+          make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default
       
       - name: Upload scan result
