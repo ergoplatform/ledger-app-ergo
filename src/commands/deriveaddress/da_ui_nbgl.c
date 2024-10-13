@@ -53,15 +53,20 @@ int ui_display_address(derive_address_ctx_t* ctx,
         }
     }
 
+    int n_pairs = 0;
+
     if (app_access_token != 0) {
-        // TO-DO
-        // ui_add_screen(ui_application_id_screen(app_access_token, ctx->app_id), &screen);
+        pairs_global[n_pairs++] = ui_application_id_screen(app_access_token, ctx->app_id);
     }
+
+    pairList.nbMaxLinesForValue = 0;
+    pairList.nbPairs = n_pairs;
+    pairList.pairs = pairs_global;
 
     if (send) {
         // Confirm Send Address
         nbgl_useCaseAddressReview(ctx->address,
-                                  NULL,
+                                  n_pairs == 0 ? NULL : &pairList,
                                   &WHEEL_ICON,
                                   "Confirm Send Address",
                                   "",
@@ -69,7 +74,7 @@ int ui_display_address(derive_address_ctx_t* ctx,
     } else {
         // Confirm Address
         nbgl_useCaseAddressReview(ctx->address,
-                                  NULL,
+                                  n_pairs == 0 ? NULL : &pairList,
                                   &INFO_I_ICON,
                                   "Confirm Address",
                                   "",

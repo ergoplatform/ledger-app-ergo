@@ -23,6 +23,9 @@ void ui_display_account_confirm(bool approved) {
     set_flow_response(approved);
 }
 
+#define PK_APPID_SIZE 255
+char pk_appid[PK_APPID_SIZE];
+
 int ui_display_account(extended_public_key_ctx_t* ctx,
                        uint32_t app_access_token,
                        uint32_t* bip32_path,
@@ -43,9 +46,14 @@ int ui_display_account(extended_public_key_ctx_t* ctx,
         return res_error(SW_BIP32_BAD_PATH);
     }
 
+    memset(pk_appid, 0, PK_APPID_SIZE);
+    strncpy(pk_appid, ctx->bip32_path, MAX_BIP32_PATH);
     if (app_access_token != 0) {
-        // TO-DO
-        // ui_add_screen(ui_application_id_screen(app_access_token, ctx->app_token), &screen);
+        pk_appid[MAX_BIP32_PATH] = '\n';
+        snprintf(*(&pk_appid) + MAX_BIP32_PATH + 1,
+                 APPLICATION_ID_STR_LEN + 13,
+                 "Application: 0x%08x",
+                 app_access_token);
     }
 
     ctx->app_token_value = app_access_token;
@@ -54,7 +62,7 @@ int ui_display_account(extended_public_key_ctx_t* ctx,
 
     nbgl_useCaseChoice(&WARNING_ICON,
                        "Ext PubKey Export",
-                       ctx->bip32_path,
+                       pk_appid,
                        "Confirm",
                        "Cancel",
                        ui_display_account_confirm);

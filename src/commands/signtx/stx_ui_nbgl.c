@@ -83,7 +83,6 @@ bool ui_stx_add_operation_approve_screens(sign_transaction_ui_aprove_ctx_t* ctx,
     int n_pairs = *screen;
 
     if (!is_known_application) {
-        ui_application_id_screen(app_access_token, ctx->app_token);
         pairs_global[n_pairs++] = ui_application_id_screen(app_access_token, ctx->app_token);
     }
 
