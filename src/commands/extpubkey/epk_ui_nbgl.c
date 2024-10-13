@@ -23,7 +23,7 @@ void ui_display_account_confirm(bool approved) {
     set_flow_response(approved);
 }
 
-#define PK_APPID_SIZE 255
+#define PK_APPID_SIZE MAX_BIP32_PATH + APPLICATION_ID_STR_LEN + 13 + 1
 char pk_appid[PK_APPID_SIZE];
 
 int ui_display_account(extended_public_key_ctx_t* ctx,
