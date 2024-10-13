@@ -21,7 +21,7 @@
 #include <os_print.h>
 
 void ui_display_account_confirm(bool approved) {
-    set_flow_reseponse(approved);
+    set_flow_response(approved);
 }
 
 int ui_display_account(extended_public_key_ctx_t* ctx,

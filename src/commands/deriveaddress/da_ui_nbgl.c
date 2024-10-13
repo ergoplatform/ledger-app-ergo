@@ -23,7 +23,7 @@
 #include "../../ui/display.h"
 
 void ui_display_address_confirm(bool approved) {
-    set_flow_reseponse(approved);
+    set_flow_response(approved);
 }
 
 int ui_display_address(derive_address_ctx_t* ctx,

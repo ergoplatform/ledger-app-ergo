@@ -15,10 +15,9 @@ const ux_flow_step_t* ui_application_id_screen(uint32_t app_id,
 #ifdef HAVE_NBGL
 #include <nbgl_use_case.h>
 
-const nbgl_layoutTagValue_t ui_application_id_screen(uint32_t app_id,
-                                                     char buffer[static APPLICATION_ID_STR_LEN]);
+nbgl_layoutTagValue_t ui_application_id_screen(uint32_t app_id,
+                                               char buffer[static APPLICATION_ID_STR_LEN]);
 
-const void ui_application_id_screen_buf(uint32_t app_id,
-                                        char buffer[static APPLICATION_ID_STR_LEN]);
+void ui_application_id_screen_buf(uint32_t app_id, char buffer[static APPLICATION_ID_STR_LEN]);
 
 #endif

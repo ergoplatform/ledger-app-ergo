@@ -24,7 +24,7 @@
 static char sub_message[APPLICATION_ID_SUBLEN];
 
 void ui_action_attest_input(bool approved) {
-    set_flow_reseponse(approved);
+    set_flow_response(approved);
 }
 
 int ui_display_access_token(uint32_t app_access_token, attest_input_ctx_t* context) {
@@ -36,11 +36,11 @@ int ui_display_access_token(uint32_t app_access_token, attest_input_ctx_t* conte
         snprintf(sub_message, APPLICATION_ID_SUBLEN, "Application: 0x%08x", app_access_token);
     }
 
-    nbgl_useCaseReviewStreamingStart(TYPE_TRANSACTION,
-                                     &VALIDATE_ICON,
-                                     "Confirm Attest Input",
-                                     sub_message,
-                                     ui_action_attest_input);
+    nbgl_useCaseConfirm("Confirm Attest Input",
+                        sub_message,
+                        "Confirm",
+                        "Reject",
+                        ui_action_attest_input);
     bool approved = io_ui_process();
 
     if (approved) {

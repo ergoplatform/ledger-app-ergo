@@ -323,16 +323,22 @@ bool stx_operation_p2pk_should_show_output_confirm_screen(
 
 // ===========================
 // UI
-
+#ifdef HAVE_BAGL
 static NOINLINE void ui_stx_operation_p2pk_approve_action(void *context) {
     sign_transaction_ui_aprove_ctx_t *ctx = (sign_transaction_ui_aprove_ctx_t *) context;
     ui_stx_operation_approve_reject(true, ctx);
 }
+#endif
+
+#ifdef HAVE_NBGL
+void p2pk_review(bool approved) {
+    set_flow_response(approved);
+}
+#endif
 
 uint16_t ui_stx_operation_p2pk_show_token_and_path(sign_transaction_operation_p2pk_ctx_t *ctx,
                                                    uint32_t app_access_token,
                                                    bool is_known_application,
-
                                                    void *sign_tx_ctx) {
     uint8_t screen = 0;
 #ifdef HAVE_BAGL
@@ -349,14 +355,7 @@ uint16_t ui_stx_operation_p2pk_show_token_and_path(sign_transaction_operation_p2
     }
     ui_add_screen(b32_step, &screen);
 #elif HAVE_NBGL
-    if (app_is_sign_ready()) {
-        ui_stx_finilize_tx(&ctx->ui_approve.ui_approve,
-                           app_access_token,
-                           is_known_application,
-                           sign_tx_ctx);
-        return SW_OK;
-    }
-    const res = ui_bip32_path_screen(
+    bool res = ui_bip32_path_screen(
         ctx->bip32.path,
         ctx->bip32.len,
         "P2PK Signing",
@@ -365,9 +364,20 @@ uint16_t ui_stx_operation_p2pk_show_token_and_path(sign_transaction_operation_p2
     if (!res) {
         return SW_BIP32_FORMATTING_FAILED;
     }
-    pairs_global[0].item = "P2PK Signing";
-    pairs_global[0].value = ctx->ui_approve.bip32_path;
-    screen++;
+    // pairs_global[0].item = "P2PK Signing";
+    // pairs_global[0].value = ctx->ui_approve.bip32_path;
+    // screen++;
+    nbgl_useCaseReviewStreamingStart(TYPE_TRANSACTION,
+                                     &VALIDATE_ICON,
+                                     "P2PK Signing",
+                                     ctx->ui_approve.bip32_path,
+                                     p2pk_review);
+    bool approved = io_ui_process();
+    if (!approved) {
+        res_deny();
+        ui_menu_main();
+        return SW_BIP32_FORMATTING_FAILED;
+    }
 #endif
 
     if (!ui_stx_add_operation_approve_screens(&ctx->ui_approve.ui_approve,
@@ -389,14 +399,6 @@ uint16_t ui_stx_operation_p2pk_show_output_confirm_screen(
                         SIGN_TRANSACTION_OPERATION_P2PK_STATE_OUTPUTS_STARTED,
                         SIGN_TRANSACTION_OPERATION_P2PK_STATE_TX_FINISHED);
     uint8_t screen = 0;
-
-    if (app_is_sign_ready()) {
-        ui_stx_finilize_2nd_tx(&ctx->transaction.ui.ui,
-                               &ctx->transaction.ui.output,
-                               &ctx->transaction.last_approved_change,
-                               ctx->network_id);
-        return SW_OK;
-    }
 
     if (!ui_stx_add_output_screens(&ctx->transaction.ui.ui,
                                    &screen,
@@ -464,17 +466,6 @@ uint16_t ui_stx_operation_p2pk_show_confirm_screen(sign_transaction_operation_p2
     CHECK_PROPER_STATE(ctx, SIGN_TRANSACTION_OPERATION_P2PK_STATE_TX_FINISHED);
     ctx->state = SIGN_TRANSACTION_OPERATION_P2PK_STATE_FINALIZED;
     uint8_t screen = 0;
-
-    if (app_is_sign_ready()) {
-        app_set_sign_ready(false);
-        ui_stx_finilize_3rd_tx(&ctx->ui_confirm,
-                               &ctx->amounts,
-                               1,
-                               ui_stx_operation_p2pk_show_tx_screen,
-                               ui_stx_operation_p2pk_send_response,
-                               (void *) ctx);
-        return SW_OK;
-    }
 
     if (!ui_stx_add_transaction_screens(&ctx->ui_confirm,
                                         &screen,

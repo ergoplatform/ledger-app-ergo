@@ -14,7 +14,7 @@ typedef struct {
     uint8_t session_key[SESSION_KEY_LEN];
     command_e current_command;  /// current command
     bool is_ui_busy;
-    bool is_sign_ready;
+    bool is_ui_nbgl_busy;
     union {
         attest_input_ctx_t attest_input;
         sign_transaction_ctx_t sign_tx;
@@ -27,13 +27,6 @@ typedef struct {
  * Global application context
  */
 extern app_ctx_t G_app_context;
-
-/**
- * Check is sign final step
- */
-static inline bool app_is_sign_ready() {
-    return G_app_context.is_sign_ready;
-}
 
 /**
  * Check is ui busy
@@ -50,10 +43,10 @@ static inline void app_set_ui_busy(bool is_busy) {
 }
 
 /**
- * Set sign final step
+ * Set UI (nbgl) busy
  */
-static inline void app_set_sign_ready(bool ready) {
-    G_app_context.is_sign_ready = ready;
+static inline void app_set_nbgl_busy(bool is_busy) {
+    G_app_context.is_ui_nbgl_busy = is_busy;
 }
 
 /**
