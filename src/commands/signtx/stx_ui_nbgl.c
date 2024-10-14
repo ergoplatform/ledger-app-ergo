@@ -90,13 +90,13 @@ bool ui_stx_add_operation_approve_screens(sign_transaction_ui_aprove_ctx_t* ctx,
     ctx->sign_tx_context = sign_tx;
     ctx->is_known_application = is_known_application;
 
-    pairList.nbMaxLinesForValue = 0;
-    pairList.nbPairs = n_pairs;
-    pairList.pairs = pairs_global;
+    pair_list.nbMaxLinesForValue = 0;
+    pair_list.nbPairs = n_pairs;
+    pair_list.pairs = pairs_global;
 
     bool approved = true;
     if (n_pairs > 0) {
-        nbgl_useCaseReviewStreamingContinue(&pairList, ui_stx_operation_approve_action);
+        nbgl_useCaseReviewStreamingContinue(&pair_list, ui_stx_operation_approve_action);
         approved = io_ui_process();
     }
 
@@ -305,11 +305,11 @@ bool ui_stx_add_output_screens(sign_transaction_ui_output_confirm_ctx_t* ctx,
         n_pairs++;
     }
 
-    pairList.nbMaxLinesForValue = 0;
-    pairList.nbPairs = n_pairs;
-    pairList.pairs = pairs_global;
+    pair_list.nbMaxLinesForValue = 0;
+    pair_list.nbPairs = n_pairs;
+    pair_list.pairs = pairs_global;
 
-    nbgl_useCaseReviewStreamingContinue(&pairList, ui_stx_operation_approve_action);
+    nbgl_useCaseReviewStreamingContinue(&pair_list, ui_stx_operation_approve_action);
 
     bool approved = io_ui_process();
 
@@ -374,11 +374,11 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
         n_pairs++;
     }
 
-    pairList.nbMaxLinesForValue = 0;
-    pairList.nbPairs = n_pairs;
-    pairList.pairs = pairs_global;
+    pair_list.nbMaxLinesForValue = 0;
+    pair_list.nbPairs = n_pairs;
+    pair_list.pairs = pairs_global;
 
-    nbgl_useCaseReviewStreamingContinue(&pairList, ui_stx_operation_approve_action);
+    nbgl_useCaseReviewStreamingContinue(&pair_list, ui_stx_operation_approve_action);
 
     bool approved = io_ui_process();
     if (!approved) {

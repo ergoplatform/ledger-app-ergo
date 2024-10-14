@@ -59,14 +59,14 @@ int ui_display_address(derive_address_ctx_t* ctx,
         pairs_global[n_pairs++] = ui_application_id_screen(app_access_token, ctx->app_id);
     }
 
-    pairList.nbMaxLinesForValue = 0;
-    pairList.nbPairs = n_pairs;
-    pairList.pairs = pairs_global;
+    pair_list.nbMaxLinesForValue = 0;
+    pair_list.nbPairs = n_pairs;
+    pair_list.pairs = pairs_global;
 
     if (send) {
         // Confirm Send Address
         nbgl_useCaseAddressReview(ctx->address,
-                                  n_pairs == 0 ? NULL : &pairList,
+                                  n_pairs == 0 ? NULL : &pair_list,
                                   &WHEEL_ICON,
                                   "Confirm Send Address",
                                   "",
@@ -74,7 +74,7 @@ int ui_display_address(derive_address_ctx_t* ctx,
     } else {
         // Confirm Address
         nbgl_useCaseAddressReview(ctx->address,
-                                  n_pairs == 0 ? NULL : &pairList,
+                                  n_pairs == 0 ? NULL : &pair_list,
                                   &INFO_I_ICON,
                                   "Confirm Address",
                                   "",
