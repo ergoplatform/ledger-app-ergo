@@ -12,9 +12,4 @@ nbgl_layoutTagValue_t ui_application_id_screen(uint32_t app_id,
     return tag;
 }
 
-void ui_application_id_screen_buf(uint32_t app_id, char buffer[static APPLICATION_ID_STR_LEN]) {
-    memset(buffer, 0, APPLICATION_ID_STR_LEN);
-    snprintf(buffer, APPLICATION_ID_STR_LEN, "Application: 0x%08x", app_id);
-}
-
 #endif

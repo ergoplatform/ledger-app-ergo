@@ -1,15 +1,9 @@
 {
     "files.associations": {
         "*.h": "c",
-        "format": "c",
-        "cstdint": "c"
+        "format": "c"
     },
     "editor.formatOnSave": false,
     "python.terminal.activateEnvironment": false,
     "git.ignoreLimitWarning": true,
-    "ledgerDevTools.appSettings": {
-        "selectedUseCase": "debug",
-        "selectedDevice": "Stax",
-        "selectedVariant": "ergo"
-    },
 }
