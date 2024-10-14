@@ -45,7 +45,7 @@ cx_err_t cx_hash_no_throw(cx_hash_t *hash,
                           uint8_t *out,
                           size_t out_len);
 
-cx_err_t cx_blake2b_256_hash(const uint8_t *data,
+cx_err_t cx_blake2b_256_hash(const uint8_t* data,
                              size_t len,
                              uint8_t out[static CX_BLAKE2B_256_SIZE]);
 

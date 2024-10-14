@@ -61,9 +61,10 @@ cx_err_t cx_hash_no_throw(cx_hash_t *hash,
     }
 }
 
-cx_err_t cx_blake2b_256_hash(const uint8_t *data,
+cx_err_t cx_blake2b_256_hash(const uint8_t* data,
                              size_t len,
-                             uint8_t out[static CX_BLAKE2B_256_SIZE]) {
+                             uint8_t out[static CX_BLAKE2B_256_SIZE])
+{
     return blake2b_ref(out, CX_BLAKE2B_256_SIZE, data, len, NULL, 0);
 }
 
