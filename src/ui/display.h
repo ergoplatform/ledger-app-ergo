@@ -12,9 +12,7 @@ void io_common_process();
 bool io_ui_process();
 
 #ifdef HAVE_NBGL
-#define N_UX_PAIRS                          \
-    TOKEN_MAX_COUNT + TOKEN_MAX_COUNT / 2 + \
-        10  // 10 reserved for other info (ex. tx amount / tx fee)
+#define N_UX_PAIRS 10
 
 static nbgl_layoutTagValueList_t pair_list;
 extern nbgl_layoutTagValue_t pairs_global[N_UX_PAIRS];

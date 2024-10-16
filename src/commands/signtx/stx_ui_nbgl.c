@@ -291,34 +291,38 @@ bool ui_stx_add_output_screens(sign_transaction_ui_output_confirm_ctx_t* ctx,
     ctx->last_approved_change = last_approved_change;
 
     int n_pairs = *screen;
+    bool approved = false;
 
     for (int i = 0; i < info_screen_count; i++) {
-        if (n_pairs >= N_UX_PAIRS - 1 - (n_pairs % 2 == 0 ? 1 : 0)) {
-            pairs_global[n_pairs].item = "Too much outputs";
-            pairs_global[n_pairs].value = "It's not possible to show other outputs";
-            break;
-        }
-        pairs_global[n_pairs].item = pair_mem_title[i];
-        pairs_global[n_pairs].value = pair_mem_text[i];
-        ui_stx_display_output_state(i, pair_mem_title[i], pair_mem_text[i], (void*) ctx);
+        pairs_global[n_pairs].item = pair_mem_title[n_pairs];
+        pairs_global[n_pairs].value = pair_mem_text[n_pairs];
+        ui_stx_display_output_state(i,
+                                    pair_mem_title[n_pairs],
+                                    pair_mem_text[n_pairs],
+                                    (void*) ctx);
         // empty row (split screens for tokens)
-        if (n_pairs % 2 == 0) {
+        if ((n_pairs + 1) % 2 == 0) {
             n_pairs++;
-            pairs_global[n_pairs].item = "";
-            pairs_global[n_pairs].value = "";
+            pair_list.nbMaxLinesForValue = 0;
+            pair_list.nbPairs = n_pairs;
+            pair_list.pairs = pairs_global;
+
+            nbgl_useCaseReviewStreamingContinue(&pair_list, ui_stx_operation_approve_action);
+            approved = io_ui_process();
+            app_set_ui_busy(false);
+
+            n_pairs = 0;
+
+            if (!approved) {
+                app_set_current_command(CMD_NONE);
+                res_deny();
+                ui_menu_main();
+                return true;
+            }
+        } else {
+            n_pairs++;
         }
-        n_pairs++;
     }
-
-    pair_list.nbMaxLinesForValue = 0;
-    pair_list.nbPairs = n_pairs;
-    pair_list.pairs = pairs_global;
-
-    nbgl_useCaseReviewStreamingContinue(&pair_list, ui_stx_operation_approve_action);
-
-    bool approved = io_ui_process();
-
-    app_set_ui_busy(false);
 
     explicit_bzero(ctx->last_approved_change, sizeof(sign_transaction_bip32_path_t));
 
@@ -330,11 +334,6 @@ bool ui_stx_add_output_screens(sign_transaction_ui_output_confirm_ctx_t* ctx,
                     sizeof(sign_transaction_bip32_path_t));
         }
         res_ok();
-    } else {
-        app_set_current_command(CMD_NONE);
-        res_deny();
-
-        ui_menu_main();
     }
 
     return true;
@@ -360,41 +359,34 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
     ctx->amounts = amounts;
 
     int n_pairs = *screen;
-
-    /*pairs_global[n_pairs++] = (nbgl_layoutTagValue_t) {
-        .item = ctx->title,
-        .value = ctx->text
-    };*/
+    bool approved = false;
 
     for (int i = 0; i < op_screen_count + 2 + (2 * tokens_count); i++) {
-        if (n_pairs >= N_UX_PAIRS - 1 - (n_pairs % 2 == 0 ? 1 : 0)) {
-            pairs_global[n_pairs].item = "Too much outputs";
-            pairs_global[n_pairs].value = "It's not possible to show other outputs";
-            break;
-        }
-        pairs_global[n_pairs].item = pair_mem_title[i];
-        pairs_global[n_pairs].value = pair_mem_text[i];
-        ui_stx_display_tx_state(i, pair_mem_title[i], pair_mem_text[i], (void*) ctx);
+        pairs_global[n_pairs].item = pair_mem_title[n_pairs];
+        pairs_global[n_pairs].value = pair_mem_text[n_pairs];
+        ui_stx_display_tx_state(i, pair_mem_title[n_pairs], pair_mem_text[n_pairs], (void*) ctx);
         // empty row (split screens for tokens)
-        if (n_pairs % 2 == 0) {
+        if ((n_pairs + 1) % 3 == 0) {
             n_pairs++;
-            pairs_global[n_pairs].item = "";
-            pairs_global[n_pairs].value = "";
+            pair_list.nbMaxLinesForValue = 0;
+            pair_list.nbPairs = n_pairs;
+            pair_list.pairs = pairs_global;
+
+            nbgl_useCaseReviewStreamingContinue(&pair_list, ui_stx_operation_approve_action);
+            approved = io_ui_process();
+            app_set_ui_busy(false);
+
+            if (!approved) {
+                res_deny();
+                app_set_current_command(CMD_NONE);
+                ui_menu_main();
+                return true;
+            }
+
+            n_pairs = 0;
+        } else {
+            n_pairs++;
         }
-        n_pairs++;
-    }
-
-    pair_list.nbMaxLinesForValue = 0;
-    pair_list.nbPairs = n_pairs;
-    pair_list.pairs = pairs_global;
-
-    nbgl_useCaseReviewStreamingContinue(&pair_list, ui_stx_operation_approve_action);
-
-    bool approved = io_ui_process();
-    if (!approved) {
-        res_deny();
-        app_set_current_command(CMD_NONE);
-        ui_menu_main();
     }
 
     if (MAX_NUMBER_OF_SCREENS - *screen < 2) return false;
