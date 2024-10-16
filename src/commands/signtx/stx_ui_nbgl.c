@@ -293,6 +293,11 @@ bool ui_stx_add_output_screens(sign_transaction_ui_output_confirm_ctx_t* ctx,
     int n_pairs = *screen;
 
     for (int i = 0; i < info_screen_count; i++) {
+        if (n_pairs >= N_UX_PAIRS - 1 - (n_pairs % 2 == 0 ? 1 : 0)) {
+            pairs_global[n_pairs].item = "Too much outputs";
+            pairs_global[n_pairs].value = "It's not possible to show other outputs";
+            break;
+        }
         pairs_global[n_pairs].item = pair_mem_title[i];
         pairs_global[n_pairs].value = pair_mem_text[i];
         ui_stx_display_output_state(i, pair_mem_title[i], pair_mem_text[i], (void*) ctx);
@@ -362,6 +367,11 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
     };*/
 
     for (int i = 0; i < op_screen_count + 2 + (2 * tokens_count); i++) {
+        if (n_pairs >= N_UX_PAIRS - 1 - (n_pairs % 2 == 0 ? 1 : 0)) {
+            pairs_global[n_pairs].item = "Too much outputs";
+            pairs_global[n_pairs].value = "It's not possible to show other outputs";
+            break;
+        }
         pairs_global[n_pairs].item = pair_mem_title[i];
         pairs_global[n_pairs].value = pair_mem_text[i];
         ui_stx_display_tx_state(i, pair_mem_title[i], pair_mem_text[i], (void*) ctx);
