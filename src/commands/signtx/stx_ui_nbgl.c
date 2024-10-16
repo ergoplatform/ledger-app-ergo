@@ -366,7 +366,8 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
         pairs_global[n_pairs].value = pair_mem_text[n_pairs];
         ui_stx_display_tx_state(i, pair_mem_title[n_pairs], pair_mem_text[n_pairs], (void*) ctx);
         // empty row (split screens for tokens)
-        if ((n_pairs + 1) % 3 == 0) {
+        if (((n_pairs + 1) % 2 == 0 && i != 1) ||
+            i == 2) {  // first page should contain 3 rows, other 2
             n_pairs++;
             pair_list.nbMaxLinesForValue = 0;
             pair_list.nbPairs = n_pairs;
