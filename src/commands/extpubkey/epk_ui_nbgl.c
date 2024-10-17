@@ -40,9 +40,10 @@ int ui_display_account(extended_public_key_ctx_t* ctx,
         return res_error(SW_BIP32_BAD_PATH);
     }
 
-    uint path_size = MEMBER_SIZE(extended_public_key_ctx_t, bip32_path);
-    memset(ctx->bip32_path, 0, path_size);
-    if (!bip32_path_format(bip32_path, bip32_path_len, ctx->bip32_path, path_size)) {
+    if (!ui_bip32_path_screen(bip32_path,
+                              bip32_path_len,
+                              ctx->bip32_path,
+                              MEMBER_SIZE(derive_address_ctx_t, bip32_path))) {
         return res_error(SW_BIP32_BAD_PATH);
     }
 

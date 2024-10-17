@@ -63,13 +63,20 @@ int ui_display_address(derive_address_ctx_t* ctx,
     pair_list.nbPairs = n_pairs;
     pair_list.pairs = pairs_global;
 
+    if (!ui_bip32_path_screen(bip32_path,
+                              bip32_path_len,
+                              ctx->bip32_path,
+                              MEMBER_SIZE(derive_address_ctx_t, bip32_path))) {
+        return res_error(SW_BIP32_BAD_PATH);
+    }
+
     if (send) {
         // Confirm Send Address
         nbgl_useCaseAddressReview(ctx->address,
                                   n_pairs == 0 ? NULL : &pair_list,
                                   &WHEEL_ICON,
                                   "Confirm Send Address",
-                                  "",
+                                  ctx->bip32_path,
                                   ui_display_address_confirm);
     } else {
         // Confirm Address
@@ -77,7 +84,7 @@ int ui_display_address(derive_address_ctx_t* ctx,
                                   n_pairs == 0 ? NULL : &pair_list,
                                   &INFO_I_ICON,
                                   "Confirm Address",
-                                  "",
+                                  ctx->bip32_path,
                                   ui_display_address_confirm);
     }
 
