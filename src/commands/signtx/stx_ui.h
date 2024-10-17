@@ -8,6 +8,12 @@
 #include "stx_types.h"
 #include "stx_context.h"
 
+#define ERGO_ID_UI_CHARACTERS_HALF 26
+#define STRING_ADD_STATIC_TEXT(str, slen, text) \
+    strncpy(str, text, slen);                   \
+    slen -= sizeof(text) - 1;                   \
+    str += sizeof(text) - 1
+
 /**
  * Add application access_token and accept/reject screens to the UI.
  *
