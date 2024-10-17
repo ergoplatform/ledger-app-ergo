@@ -14,7 +14,6 @@ typedef struct {
     uint8_t session_key[SESSION_KEY_LEN];
     command_e current_command;  /// current command
     bool is_ui_busy;
-    bool is_ui_nbgl_busy;
     union {
         attest_input_ctx_t attest_input;
         sign_transaction_ctx_t sign_tx;
@@ -40,13 +39,6 @@ static inline bool app_is_ui_busy() {
  */
 static inline void app_set_ui_busy(bool is_busy) {
     G_app_context.is_ui_busy = is_busy;
-}
-
-/**
- * Set UI (nbgl) busy
- */
-static inline void app_set_nbgl_busy(bool is_busy) {
-    G_app_context.is_ui_nbgl_busy = is_busy;
 }
 
 /**
