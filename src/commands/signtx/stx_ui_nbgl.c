@@ -194,11 +194,11 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
     if (approved) {
         ctx->op_response_cb(ctx->op_cb_context);
         app_set_current_command(CMD_NONE);
-        nbgl_useCaseReviewStatus(STATUS_TYPE_MESSAGE_SIGNED, quit_callback);
+        nbgl_useCaseReviewStatus(STATUS_TYPE_TRANSACTION_SIGNED, quit_callback);
     } else {
         res_deny();
         app_set_current_command(CMD_NONE);
-        nbgl_useCaseReviewStatus(STATUS_TYPE_MESSAGE_REJECTED, quit_callback);
+        nbgl_useCaseReviewStatus(STATUS_TYPE_TRANSACTION_REJECTED, quit_callback);
     }
 
     io_ui_process();
