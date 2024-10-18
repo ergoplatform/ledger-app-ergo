@@ -79,7 +79,9 @@ int ui_display_address(derive_address_ctx_t* ctx,
     if (!send) {
         pk_appid_addr[MAX_BIP32_PATH + offset] = '\n';
         strncpy(*(&pk_appid_addr) + MAX_BIP32_PATH + offset + 1, "Address: ", 9);
-        strncpy(*(&pk_appid_addr) + MAX_BIP32_PATH + offset + 1 + 9, ctx->address, MEMBER_SIZE(derive_address_ctx_t, address));
+        strncpy(*(&pk_appid_addr) + MAX_BIP32_PATH + offset + 1 + 9,
+                ctx->address,
+                MEMBER_SIZE(derive_address_ctx_t, address));
     }
 
     if (send) {
