@@ -368,7 +368,7 @@ uint16_t ui_stx_operation_p2pk_show_token_and_path(sign_transaction_operation_p2
     // pairs_global[0].value = ctx->ui_approve.bip32_path;
     // screen++;
     nbgl_useCaseReviewStreamingStart(TYPE_TRANSACTION,
-                                     &VALIDATE_ICON,
+                                     &C_app_logo_64px,
                                      "P2PK Signing",
                                      ctx->ui_approve.bip32_path,
                                      p2pk_review);
