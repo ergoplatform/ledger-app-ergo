@@ -76,9 +76,11 @@ int ui_display_address(derive_address_ctx_t* ctx,
                  app_access_token);
     }
 
-    pk_appid_addr[MAX_BIP32_PATH + offset] = '\n';
-    strncpy(*(&pk_appid_addr) + MAX_BIP32_PATH + offset + 1, "Address: ", 9);
-    strcpy(*(&pk_appid_addr) + MAX_BIP32_PATH + offset + 1 + 9, ctx->address);
+    if (!send) {
+        pk_appid_addr[MAX_BIP32_PATH + offset] = '\n';
+        strncpy(*(&pk_appid_addr) + MAX_BIP32_PATH + offset + 1, "Address: ", 9);
+        strcpy(*(&pk_appid_addr) + MAX_BIP32_PATH + offset + 1 + 9, ctx->address);
+    }
 
     if (send) {
         // Confirm Send Address
