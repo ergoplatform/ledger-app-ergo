@@ -18,9 +18,9 @@ function signTxFlows({ device }, auth, from, to, change, tokens_to = undefined, 
     flows[i++].push({ header: null, body: 'Approve' }, { header: null, body: 'Reject' });
     // accept tx screen
     flows[i] = [{ header: 'P2PK Signing', body: removeMasterNode(from.path.toString()) }];
-    if (!auth) {
+    /*if (!auth) {
         flows[i].push({ header: 'Application', body: '0x00000000' });
-    }
+    }*/
     flows[i++].push({ header: null, body: 'Approve' }, { header: null, body: 'Reject' });
     // output screen
     if (to) {
