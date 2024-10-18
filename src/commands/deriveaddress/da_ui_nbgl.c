@@ -20,6 +20,10 @@
 #include "../../ui/ui_main.h"
 #include "../../ui/display.h"
 
+#define PK_APPID_ADDR_SIZE \
+    MAX_BIP32_PATH + APPLICATION_ID_STR_LEN + 13 + 1 + P2PK_ADDRESS_STRING_MAX_LEN + 9 + 1
+char pk_appid_addr[PK_APPID_ADDR_SIZE];
+
 void ui_display_address_confirm(bool approved) {
     set_flow_response(approved);
 }
@@ -53,16 +57,6 @@ int ui_display_address(derive_address_ctx_t* ctx,
         }
     }
 
-    int n_pairs = 0;
-
-    if (app_access_token != 0) {
-        pairs_global[n_pairs++] = ui_application_id_screen(app_access_token, ctx->app_id);
-    }
-
-    pair_list.nbMaxLinesForValue = 0;
-    pair_list.nbPairs = n_pairs;
-    pair_list.pairs = pairs_global;
-
     if (!ui_bip32_path_screen(bip32_path,
                               bip32_path_len,
                               ctx->bip32_path,
@@ -70,22 +64,38 @@ int ui_display_address(derive_address_ctx_t* ctx,
         return res_error(SW_BIP32_BAD_PATH);
     }
 
+    memset(pk_appid_addr, 0, PK_APPID_ADDR_SIZE);
+    strncpy(pk_appid_addr, ctx->bip32_path, MAX_BIP32_PATH);
+    int offset = 0;
+    if (app_access_token != 0) {
+        pk_appid_addr[MAX_BIP32_PATH] = '\n';
+        offset += APPLICATION_ID_STR_LEN + 13;
+        snprintf(*(&pk_appid_addr) + MAX_BIP32_PATH + 1,
+                 APPLICATION_ID_STR_LEN + 13,
+                 "Application: 0x%08x",
+                 app_access_token);
+    }
+
+    pk_appid_addr[MAX_BIP32_PATH + offset] = '\n';
+    strncpy(*(&pk_appid_addr) + MAX_BIP32_PATH + offset + 1, "Address: ", 9);
+    strcpy(*(&pk_appid_addr) + MAX_BIP32_PATH + offset + 1 + 9, ctx->address);
+
     if (send) {
         // Confirm Send Address
-        nbgl_useCaseAddressReview(ctx->address,
-                                  n_pairs == 0 ? NULL : &pair_list,
-                                  &WHEEL_ICON,
-                                  "Confirm Send Address",
-                                  ctx->bip32_path,
-                                  ui_display_address_confirm);
+        nbgl_useCaseChoice(&WHEEL_ICON,
+                           "Address Export",
+                           pk_appid_addr,
+                           "Confirm",
+                           "Cancel",
+                           ui_display_address_confirm);
     } else {
         // Confirm Address
-        nbgl_useCaseAddressReview(ctx->address,
-                                  n_pairs == 0 ? NULL : &pair_list,
-                                  &INFO_I_ICON,
-                                  "Confirm Address",
-                                  ctx->bip32_path,
-                                  ui_display_address_confirm);
+        nbgl_useCaseChoice(&INFO_I_ICON,
+                           "Confirm Address",
+                           pk_appid_addr,
+                           "Confirm",
+                           "Cancel",
+                           ui_display_address_confirm);
     }
 
     memmove(ctx->raw_address, raw_address, P2PK_ADDRESS_LEN);
