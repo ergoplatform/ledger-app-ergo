@@ -28,6 +28,10 @@ static NOINLINE void ui_stx_operation_approve_action(bool approved) {
     set_flow_response(approved);
 }
 
+static NOINLINE void quit_callback(void) {
+    set_flow_response(true);
+}
+
 bool ui_stx_add_operation_approve_screens(sign_transaction_ui_aprove_ctx_t* ctx,
                                           uint8_t* screen,
                                           uint32_t app_access_token,
@@ -189,11 +193,15 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
 
     if (approved) {
         ctx->op_response_cb(ctx->op_cb_context);
+        app_set_current_command(CMD_NONE);
+        nbgl_useCaseReviewStatus(STATUS_TYPE_MESSAGE_SIGNED, quit_callback);
     } else {
         res_deny();
+        app_set_current_command(CMD_NONE);
+        nbgl_useCaseReviewStatus(STATUS_TYPE_MESSAGE_REJECTED, quit_callback);
     }
 
-    app_set_current_command(CMD_NONE);
+    io_ui_process();
     ui_menu_main();
 
     return true;
