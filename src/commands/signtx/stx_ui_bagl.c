@@ -52,7 +52,7 @@ bool ui_stx_add_operation_approve_screens(sign_transaction_ui_aprove_ctx_t* ctx,
                                           sign_transaction_ctx_t* sign_tx) {
     if (MAX_NUMBER_OF_SCREENS - *screen < 3) return false;
 
-    if (!is_known_application) {
+    if (!is_known_application && app_access_token != 0) {
         ui_add_screen(ui_application_id_screen(app_access_token, ctx->app_token), screen);
     }
     ctx->app_token_value = app_access_token;
