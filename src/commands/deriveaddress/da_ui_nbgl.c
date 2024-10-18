@@ -21,7 +21,7 @@
 #include "../../ui/display.h"
 
 #define PK_APPID_ADDR_SIZE \
-    MAX_BIP32_PATH + APPLICATION_ID_STR_LEN + 13 + 1 + P2PK_ADDRESS_STRING_MAX_LEN + 9 + 1
+    MAX_BIP32_STRING_LEN + APPLICATION_ID_STR_LEN + 13 + 1 + P2PK_ADDRESS_STRING_MAX_LEN + 9 + 1
 char pk_appid_addr[PK_APPID_ADDR_SIZE];
 
 void ui_display_address_confirm(bool approved) {
@@ -64,22 +64,24 @@ int ui_display_address(derive_address_ctx_t* ctx,
         return res_error(SW_BIP32_BAD_PATH);
     }
 
+    int bip32_str_len = strlen(ctx->bip32_path);
+
     memset(pk_appid_addr, 0, PK_APPID_ADDR_SIZE);
-    strncpy(pk_appid_addr, ctx->bip32_path, MAX_BIP32_PATH);
+    strncpy(pk_appid_addr, ctx->bip32_path, bip32_str_len);
     int offset = 0;
     if (app_access_token != 0) {
-        pk_appid_addr[MAX_BIP32_PATH] = '\n';
+        pk_appid_addr[bip32_str_len] = '\n';
         offset += APPLICATION_ID_STR_LEN + 13;
-        snprintf(*(&pk_appid_addr) + MAX_BIP32_PATH + 1,
+        snprintf(*(&pk_appid_addr) + bip32_str_len + 1,
                  APPLICATION_ID_STR_LEN + 13,
                  "Application: 0x%08x",
                  app_access_token);
     }
 
     if (!send) {
-        pk_appid_addr[MAX_BIP32_PATH + offset] = '\n';
-        strncpy(*(&pk_appid_addr) + MAX_BIP32_PATH + offset + 1, "Address: ", 9);
-        strncpy(*(&pk_appid_addr) + MAX_BIP32_PATH + offset + 1 + 9,
+        pk_appid_addr[bip32_str_len + offset] = '\n';
+        strncpy(*(&pk_appid_addr) + bip32_str_len + offset + 1, "Address: ", 9);
+        strncpy(*(&pk_appid_addr) + bip32_str_len + offset + 1 + 9,
                 ctx->address,
                 MEMBER_SIZE(derive_address_ctx_t, address));
     }

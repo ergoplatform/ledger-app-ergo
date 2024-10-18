@@ -23,7 +23,7 @@ void ui_display_account_confirm(bool approved) {
     set_flow_response(approved);
 }
 
-#define PK_APPID_SIZE MAX_BIP32_PATH + APPLICATION_ID_STR_LEN + 13 + 1
+#define PK_APPID_SIZE MAX_BIP32_STRING_LEN + APPLICATION_ID_STR_LEN + 13 + 1
 char pk_appid[PK_APPID_SIZE];
 
 int ui_display_account(extended_public_key_ctx_t* ctx,
@@ -47,11 +47,13 @@ int ui_display_account(extended_public_key_ctx_t* ctx,
         return res_error(SW_BIP32_BAD_PATH);
     }
 
+    int bip32_str_len = strlen(ctx->bip32_path);
+
     memset(pk_appid, 0, PK_APPID_SIZE);
-    strncpy(pk_appid, ctx->bip32_path, MAX_BIP32_PATH);
+    strncpy(pk_appid, ctx->bip32_path, bip32_str_len);
     if (app_access_token != 0) {
-        pk_appid[MAX_BIP32_PATH] = '\n';
-        snprintf(*(&pk_appid) + MAX_BIP32_PATH + 1,
+        pk_appid[bip32_str_len] = '\n';
+        snprintf(*(&pk_appid) + bip32_str_len + 1,
                  APPLICATION_ID_STR_LEN + 13,
                  "Application: 0x%08x",
                  app_access_token);
