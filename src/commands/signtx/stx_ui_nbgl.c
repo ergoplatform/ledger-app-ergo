@@ -64,6 +64,25 @@ bool ui_stx_add_operation_approve_screens(sign_transaction_ui_aprove_ctx_t* ctx,
     return true;
 }
 
+static nbgl_layoutTagValue_t pair;
+static sign_transaction_ui_output_confirm_ctx_t* output_screen_ctx = NULL;
+
+static nbgl_layoutTagValue_t* getOutputPair(uint8_t index) {
+    if ((index + 1) % 3 == 0) {
+        pair.item = "";
+        pair.value = "";
+    } else {
+        pair.item = pair_mem_title[index];
+        pair.value = pair_mem_text[index];
+
+        ui_stx_display_output_state(index - index / 3,
+                                    pair_mem_title[index],
+                                    pair_mem_text[index],
+                                    (void*) output_screen_ctx);
+    }
+    return &pair;
+}
+
 bool ui_stx_add_output_screens(sign_transaction_ui_output_confirm_ctx_t* ctx,
                                uint8_t* screen,
                                const sign_transaction_output_info_ctx_t* output,
@@ -86,38 +105,25 @@ bool ui_stx_add_output_screens(sign_transaction_ui_output_confirm_ctx_t* ctx,
     ctx->output = output;
     ctx->last_approved_change = last_approved_change;
 
-    int n_pairs = *screen;
-    bool approved = false;
+    pair_list.nbMaxLinesForValue = 0;
+    pair_list.pairs = NULL;
+    pair_list.nbPairs = info_screen_count + info_screen_count / 2;
+    pair_list.callback = getOutputPair;
+    pair_list.startIndex = 0;
 
-    for (int i = 0; i < info_screen_count; i++) {
-        pairs_global[n_pairs].item = pair_mem_title[n_pairs];
-        pairs_global[n_pairs].value = pair_mem_text[n_pairs];
-        ui_stx_display_output_state(i,
-                                    pair_mem_title[n_pairs],
-                                    pair_mem_text[n_pairs],
-                                    (void*) ctx);
-        // empty row (split screens for tokens)
-        if ((n_pairs + 1) % 2 == 0) {
-            n_pairs++;
-            pair_list.nbMaxLinesForValue = 0;
-            pair_list.nbPairs = n_pairs;
-            pair_list.pairs = pairs_global;
+    output_screen_ctx = ctx;
 
-            nbgl_useCaseReviewStreamingContinue(&pair_list, ui_stx_operation_approve_action);
-            approved = io_ui_process();
-            app_set_ui_busy(false);
+    nbgl_useCaseReviewStreamingContinue(&pair_list, ui_stx_operation_approve_action);
 
-            n_pairs = 0;
+    bool approved = io_ui_process();
+    app_set_ui_busy(false);
+    output_screen_ctx = NULL;
 
-            if (!approved) {
-                app_set_current_command(CMD_NONE);
-                res_deny();
-                ui_menu_main();
-                return true;
-            }
-        } else {
-            n_pairs++;
-        }
+    if (!approved) {
+        app_set_current_command(CMD_NONE);
+        res_deny();
+        ui_menu_main();
+        return true;
     }
 
     explicit_bzero(ctx->last_approved_change, sizeof(sign_transaction_bip32_path_t));
@@ -133,6 +139,19 @@ bool ui_stx_add_output_screens(sign_transaction_ui_output_confirm_ctx_t* ctx,
     }
 
     return true;
+}
+
+static sign_transaction_ui_sign_confirm_ctx_t* sign_confirm_screen_ctx = NULL;
+
+static nbgl_layoutTagValue_t* getSignConfirmPair(uint8_t index) {
+    pair.item = pair_mem_title[index];
+    pair.value = pair_mem_text[index];
+
+    ui_stx_display_tx_state(index,
+                            pair_mem_title[index],
+                            pair_mem_text[index],
+                            (void*) sign_confirm_screen_ctx);
+    return &pair;
 }
 
 bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
@@ -154,36 +173,25 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
     ctx->op_cb_context = cb_context;
     ctx->amounts = amounts;
 
-    int n_pairs = *screen;
-    bool approved = false;
+    pair_list.nbMaxLinesForValue = 0;
+    pair_list.pairs = NULL;
+    pair_list.nbPairs = op_screen_count + 2 + (2 * tokens_count);
+    pair_list.callback = getSignConfirmPair;
+    pair_list.startIndex = 0;
 
-    for (int i = 0; i < op_screen_count + 2 + (2 * tokens_count); i++) {
-        pairs_global[n_pairs].item = pair_mem_title[n_pairs];
-        pairs_global[n_pairs].value = pair_mem_text[n_pairs];
-        ui_stx_display_tx_state(i, pair_mem_title[n_pairs], pair_mem_text[n_pairs], (void*) ctx);
-        // empty row (split screens for tokens)
-        if (((n_pairs + 1) % 2 == 0 && i != 1) ||
-            i == 2) {  // first page should contain 3 rows, other 2
-            n_pairs++;
-            pair_list.nbMaxLinesForValue = 0;
-            pair_list.nbPairs = n_pairs;
-            pair_list.pairs = pairs_global;
+    sign_confirm_screen_ctx = ctx;
 
-            nbgl_useCaseReviewStreamingContinue(&pair_list, ui_stx_operation_approve_action);
-            approved = io_ui_process();
-            app_set_ui_busy(false);
+    nbgl_useCaseReviewStreamingContinue(&pair_list, ui_stx_operation_approve_action);
 
-            if (!approved) {
-                res_deny();
-                app_set_current_command(CMD_NONE);
-                ui_menu_main();
-                return true;
-            }
+    bool approved = io_ui_process();
+    app_set_ui_busy(false);
+    sign_confirm_screen_ctx = NULL;
 
-            n_pairs = 0;
-        } else {
-            n_pairs++;
-        }
+    if (!approved) {
+        res_deny();
+        app_set_current_command(CMD_NONE);
+        ui_menu_main();
+        return true;
     }
 
     if (MAX_NUMBER_OF_SCREENS - *screen < 2) return false;
