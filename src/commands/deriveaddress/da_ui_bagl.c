@@ -1,3 +1,5 @@
+#ifdef HAVE_BAGL
+
 #include <os.h>
 #include <ux.h>
 #include <glyphs.h>
@@ -47,11 +49,6 @@ static NOINLINE void ui_action_derive_address(bool approved, void* context) {
     }
 
     ui_menu_main();
-}
-
-static inline int send_error(uint16_t err) {
-    app_set_current_command(CMD_NONE);
-    return res_error(err);
 }
 
 // Display
@@ -117,3 +114,5 @@ int ui_display_address(derive_address_ctx_t* ctx,
 
     return 0;
 }
+
+#endif

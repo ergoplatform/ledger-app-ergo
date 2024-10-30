@@ -30,7 +30,7 @@ APPNAME = "Ergo"
 # Application version
 APPVERSION_M = 0
 APPVERSION_N = 0
-APPVERSION_P = 5
+APPVERSION_P = 6
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Application source files
@@ -38,10 +38,10 @@ APP_SOURCE_PATH += src
 
 # Application icons following guidelines:
 # https://developers.ledger.com/docs/embedded-app/design-requirements/#device-icon
-ICON_NANOS = icons/app_16px.gif
 ICON_NANOX = icons/app_14px.gif
 ICON_NANOSP = icons/app_14px.gif
-#ICON_STAX = icons/app_32px.gif
+ICON_STAX = icons/app_32px.gif
+ICON_FLEX = icons/app_40px.gif
 
 # Application allowed derivation curves.
 # Possibles curves are: secp256k1, secp256r1, ed25519 and bls12381g1

@@ -1,3 +1,4 @@
+#ifdef HAVE_BAGL
 #include "ui_application_id.h"
 #include <string.h>
 #include <stdio.h>
@@ -20,3 +21,4 @@ const ux_flow_step_t* ui_application_id_screen(uint32_t app_id,
     snprintf(buffer, APPLICATION_ID_STR_LEN, "0x%08x", app_id);
     return &ux_app_token_step;
 }
+#endif

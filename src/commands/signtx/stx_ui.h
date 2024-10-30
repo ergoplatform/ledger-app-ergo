@@ -46,6 +46,7 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
                                     ui_sign_transaction_operation_send_response_cb response_cb,
                                     void* cb_context);
 
+#ifdef HAVE_BAGL
 /**
  * Finalizes screen flow and pushes it to the screen.
  *
@@ -53,6 +54,7 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
  *
  */
 bool ui_stx_display_screens(uint8_t screen_count);
+#endif
 
 /**
  * Approve or reject operation programmatically.

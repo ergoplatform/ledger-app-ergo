@@ -15,6 +15,8 @@
  *  limitations under the License.
  *****************************************************************************/
 
+#ifdef HAVE_BAGL
+
 #include <os.h>
 #include <ux.h>
 #include <glyphs.h>
@@ -22,7 +24,7 @@
 #include "ui_menu.h"
 #include "ui_main.h"
 
-UX_STEP_NOCB(ux_menu_ready_step, pnn, {&C_app_logo, APPNAME, "is ready"});
+UX_STEP_NOCB(ux_menu_ready_step, pnn, {&C_app_logo_16px, APPNAME, "is ready"});
 UX_STEP_CB(ux_menu_about_step, pb, ui_menu_about(), {&C_icon_certificate, "About"});
 UX_STEP_CB(ux_menu_exit_step, pb, os_sched_exit(-1), {&C_icon_dashboard_x, "Quit"});
 
@@ -53,3 +55,5 @@ void ui_menu_about() {
 
     app_set_ui_busy(false);
 }
+
+#endif

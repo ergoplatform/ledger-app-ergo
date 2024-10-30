@@ -1,5 +1,5 @@
 #pragma once
-
+#ifdef HAVE_BAGL
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -13,3 +13,5 @@ bool ui_add_dynamic_flow_screens(uint8_t *screen,
                                  char *text_storage,
                                  ui_dynamic_flow_show_screen_cb show_cb,
                                  void *cb_ctx);
+
+#endif

@@ -13,9 +13,9 @@
         "mocha": "^10.1.0"
     },
     "dependencies": {
-        "@ledgerhq/hw-transport-node-hid": "6.28.5",
-        "@ledgerhq/hw-transport-node-speculos-http": "6.28.5",
-        "ergo-lib-wasm-nodejs": "v0.26.0",
-        "ledger-ergo-js": "^0.1.14"
+        "@ledgerhq/hw-transport-node-hid": "6.29.5",
+        "@ledgerhq/hw-transport-node-speculos-http": "6.29.4",
+        "ergo-lib-wasm-nodejs": "v0.28.0",
+        "ledger-ergo-js": "^0.1.18"
     }
 }

@@ -1,3 +1,5 @@
+#ifdef HAVE_BAGL
+
 #include <os.h>
 #include <ux.h>
 #include <string.h>
@@ -85,3 +87,5 @@ int ui_display_account(extended_public_key_ctx_t* ctx,
 
     return 0;
 }
+
+#endif

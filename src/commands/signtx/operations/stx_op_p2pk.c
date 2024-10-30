@@ -10,6 +10,8 @@
 #include "../../../ergo/network_id.h"
 #include "../stx_ui.h"
 #include "../../../ui/ui_main.h"
+#include "../../../ui/display.h"
+#include "../../../ui/ui_menu.h"
 
 #define COMMAND_ERROR_HANDLER handler_err
 #include "../../../helpers/cmd_macros.h"
@@ -322,17 +324,25 @@ bool stx_operation_p2pk_should_show_output_confirm_screen(
 
 // ===========================
 // UI
-
+#ifdef HAVE_BAGL
 static NOINLINE void ui_stx_operation_p2pk_approve_action(void *context) {
     sign_transaction_ui_aprove_ctx_t *ctx = (sign_transaction_ui_aprove_ctx_t *) context;
     ui_stx_operation_approve_reject(true, ctx);
 }
+#endif
+
+#ifdef HAVE_NBGL
+void p2pk_review(bool approved) {
+    set_flow_response(approved);
+}
+#endif
 
 uint16_t ui_stx_operation_p2pk_show_token_and_path(sign_transaction_operation_p2pk_ctx_t *ctx,
                                                    uint32_t app_access_token,
                                                    bool is_known_application,
                                                    void *sign_tx_ctx) {
     uint8_t screen = 0;
+#ifdef HAVE_BAGL
     const ux_flow_step_t *b32_step = ui_bip32_path_screen(
         ctx->bip32.path,
         ctx->bip32.len,
@@ -345,6 +355,30 @@ uint16_t ui_stx_operation_p2pk_show_token_and_path(sign_transaction_operation_p2
         return SW_BIP32_FORMATTING_FAILED;
     }
     ui_add_screen(b32_step, &screen);
+#elif HAVE_NBGL
+    bool res = ui_bip32_path_screen(
+        ctx->bip32.path,
+        ctx->bip32.len,
+        ctx->ui_approve.bip32_path,
+        MEMBER_SIZE(sign_transaction_operation_p2pk_ui_approve_data_ctx_t, bip32_path));
+    if (!res) {
+        return SW_BIP32_FORMATTING_FAILED;
+    }
+    // pairs_global[0].item = "P2PK Signing";
+    // pairs_global[0].value = ctx->ui_approve.bip32_path;
+    // screen++;
+    nbgl_useCaseReviewStreamingStart(TYPE_TRANSACTION,
+                                     &C_app_logo_64px,
+                                     "P2PK Signing",
+                                     ctx->ui_approve.bip32_path,
+                                     p2pk_review);
+    bool approved = io_ui_process();
+    if (!approved) {
+        res_deny();
+        ui_menu_main();
+        return SW_BIP32_FORMATTING_FAILED;
+    }
+#endif
 
     if (!ui_stx_add_operation_approve_screens(&ctx->ui_approve.ui_approve,
                                               &screen,
@@ -353,9 +387,11 @@ uint16_t ui_stx_operation_p2pk_show_token_and_path(sign_transaction_operation_p2
                                               sign_tx_ctx)) {
         return SW_SCREENS_BUFFER_OVERFLOW;
     }
+#ifdef HAVE_BAGL
     if (!ui_stx_display_screens(screen)) {
         return SW_SCREENS_BUFFER_OVERFLOW;
     }
+#endif
     return SW_OK;
 }
 
@@ -365,6 +401,7 @@ uint16_t ui_stx_operation_p2pk_show_output_confirm_screen(
                         SIGN_TRANSACTION_OPERATION_P2PK_STATE_OUTPUTS_STARTED,
                         SIGN_TRANSACTION_OPERATION_P2PK_STATE_TX_FINISHED);
     uint8_t screen = 0;
+
     if (!ui_stx_add_output_screens(&ctx->transaction.ui.ui,
                                    &screen,
                                    &ctx->transaction.ui.output,
@@ -372,9 +409,11 @@ uint16_t ui_stx_operation_p2pk_show_output_confirm_screen(
                                    ctx->network_id)) {
         return SW_SCREENS_BUFFER_OVERFLOW;
     }
+#ifdef HAVE_BAGL
     if (!ui_stx_display_screens(screen)) {
         return SW_SCREENS_BUFFER_OVERFLOW;
     }
+#endif
     return SW_OK;
 }
 
@@ -431,6 +470,7 @@ uint16_t ui_stx_operation_p2pk_show_confirm_screen(sign_transaction_operation_p2
     CHECK_PROPER_STATE(ctx, SIGN_TRANSACTION_OPERATION_P2PK_STATE_TX_FINISHED);
     ctx->state = SIGN_TRANSACTION_OPERATION_P2PK_STATE_FINALIZED;
     uint8_t screen = 0;
+
     if (!ui_stx_add_transaction_screens(&ctx->ui_confirm,
                                         &screen,
                                         &ctx->amounts,
@@ -440,8 +480,10 @@ uint16_t ui_stx_operation_p2pk_show_confirm_screen(sign_transaction_operation_p2
                                         (void *) ctx)) {
         return SW_SCREENS_BUFFER_OVERFLOW;
     }
+#ifdef HAVE_BAGL
     if (!ui_stx_display_screens(screen)) {
         return SW_SCREENS_BUFFER_OVERFLOW;
     }
+#endif
     return SW_OK;
 }

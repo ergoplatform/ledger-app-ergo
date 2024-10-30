@@ -1,25 +1,27 @@
 {
     "env": {
-        "BOLOS_SDK": "~/.ledger/nanos-sdk",
+        "BOLOS_SDK": "~/.ledger/nanosplus-sdk",
         "ARM_GCC": "~/.ledger/gcc-arm-none-eabi-13.2-2023.10"
     },
     "configurations": [
         {
-            "name": "Nano S",
+            "name": "Nano S+",
             "includePath": [
                 "${workspaceFolder}/src",
-                "${workspaceFolder}/build/nanos/gen_src",
+                "${workspaceFolder}/build/stax/gen_src",
                 "${env:ARM_GCC}/arm-none-eabi/include/*",
                 "${env:ARM_GCC}/lib/gcc/arm-none-eabi/13.2.1/include/*",
                 "${env:BOLOS_SDK}/include/*",
                 "${env:BOLOS_SDK}/lib_ux/include/*",
+                "${env:BOLOS_SDK}/lib_nbgl/include/*",
                 "${env:BOLOS_SDK}/lib_cxng/include/*",
                 "${env:BOLOS_SDK}/lib_standard_app/*"
             ],
             "defines": [
-                "TARGET_NANOS",
+                "TARGET_NANOS2",
                 "OS_IO_SEPROXYHAL",
-                "HAVE_BAGL",
+                "HAVE_NBGL",
+                "HAVE_SE_TOUCH",
                 "HAVE_ECC",
                 "HAVE_ECC_WEIERSTRASS",
                 "HAVE_SECP_CURVES",
@@ -50,7 +52,7 @@
                 "PRINTF=screen_printf",
                 "_DEFAULT_SOURCE"
             ],
-            "compilerPath": "${env:ARM_GCC}/bin/arm-none-eabi-gcc",
+            "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "gcc-arm",

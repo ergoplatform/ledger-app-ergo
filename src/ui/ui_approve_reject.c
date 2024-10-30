@@ -1,3 +1,4 @@
+#ifdef HAVE_BAGL
 #include <glyphs.h>
 #include "ui_approve_reject.h"
 
@@ -30,3 +31,4 @@ void ui_approve_reject_screens(ui_approve_reject_callback cb,
     *approve = &ux_approve_step;
     *reject = &ux_reject_step;
 }
+#endif
