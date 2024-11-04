@@ -3,38 +3,11 @@ name: Compilation & tests
 on: [push, pull_request]
 
 jobs:
-  job_build_nano_debug:
-    name: Build application for NanoS+, X, Stax, Flex
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - SDK: "$NANOX_SDK"
-            artifact: ergo-app-debug-nanox
-          - SDK: "$NANOSP_SDK"
-            artifact: ergo-app-debug-nanosp
-          - SDK: "$STAX_SDK"
-            artifact: ergo-app-debug-stax
-          - SDK: "$FLEX_SDK"
-            artifact: ergo-app-debug-flex
-
-    container:
-      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder-lite:latest
-
-    steps:
-      - name: Clone
-        uses: actions/checkout@v4
-
-      - name: Build
-        run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          make BOLOS_SDK=${{ matrix.SDK }} DEBUG=1
-
-      - name: Upload app binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.artifact }}
-          path: bin
+  job_build_application:
+    name: Build application using the reusable workflow
+    uses: LedgerHQ/ledger-app-workflows/.github/workflows/reusable_build.yml@v1
+    with:
+      upload_app_binaries_artifact: "compiled_app_binaries"
 
   job_unit_test:
     name: Unit tests
@@ -122,7 +95,7 @@ jobs:
           export BOLOS_SDK=${{ matrix.SDK }}
           make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default
-      
+
       - name: Upload scan result
         uses: actions/upload-artifact@v4
         if: failure()
@@ -133,15 +106,17 @@ jobs:
   job_test:
     name: Functional Tests
 
-    strategy: 
+    strategy:
       matrix:
         include:
-          - model: nanox
-          - model: nanosp
-          #- model: stax
-          #- model: flex
-    
-    needs: job_build_nano_debug
+          - model:
+              id: nanox
+              dir: nanox
+          - model:
+              id: nanosp
+              dir: nanos2
+
+    needs: job_build_application
     runs-on: ubuntu-latest
 
     container:
@@ -158,7 +133,7 @@ jobs:
       - name: Download app binary
         uses: actions/download-artifact@v4
         with:
-          name: ergo-app-debug-${{matrix.model}}
+          name: compiled_app_binaries
           path: bin
 
       - name: Run test
@@ -167,13 +142,13 @@ jobs:
           curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
           apt-get install -qy nodejs
           export SEED=`cat tests/seed.txt`
-          nohup bash -c "python /speculos/speculos.py bin/app.elf --apdu-port 9999 --api-port 5000 --display headless --model=${{ matrix.model }} --seed \"${SEED}\"" > speculos.log 2<&1 &
+          nohup bash -c "python /speculos/speculos.py bin/${{ matrix.model.dir }}/bin/app.elf --apdu-port 9999 --api-port 5000 --display headless --model=${{ matrix.model.id }} --seed \"${SEED}\"" > speculos.log 2<&1 &
           cd tests && npm install
           until `nc -w5 -z -v 127.0.0.1 9999`; do sleep 1; done;
-          npm --model=${{matrix.model}} --port=5000 run test
+          npm --model=${{matrix.model.id}} --port=5000 run test
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v4
         with:
-          name: speculos-${{matrix.model}}-log
+          name: speculos-${{matrix.model.id}}-log
           path: speculos.log

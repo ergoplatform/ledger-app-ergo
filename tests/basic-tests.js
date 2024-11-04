@@ -11,7 +11,7 @@ describe("Basic Tests", function () {
                 major: makefile.versionMajor,
                 minor: makefile.versionMinor,
                 patch: makefile.versionPatch,
-                flags: { isDebug: true }
+                flags: { isDebug: false }
             });
         });
 
