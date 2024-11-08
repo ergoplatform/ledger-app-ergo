@@ -45,7 +45,7 @@ uint16_t ui_stx_display_output_state(uint8_t screen, char* title, char* text, vo
                     return SW_ADDRESS_FORMATTING_FAILED;
                 }
             } else {  // Token Value
-                snprintf(title, title_len, "Token [%d] Value", (int) (screen / 2) + 1);
+                snprintf(title, title_len, "Token [%d] Raw Value", (int) (screen / 2) + 1);
                 format_u64(text, text_len, ctx->output->tokens[token_idx]);
             }
             break;
@@ -96,7 +96,7 @@ uint16_t ui_stx_display_tx_state(uint8_t screen, char* title, char* text, void* 
                     return SW_ADDRESS_FORMATTING_FAILED;
                 }
             } else {  // Token Value
-                snprintf(title, title_len, "Token [%d] Value", (int) (screen / 2) + 1);
+                snprintf(title, title_len, "Token [%d] Raw Value", (int) (screen / 2) + 1);
                 int64_t value = ctx->amounts->tokens[token_idx];
                 if (value < 0) {  // output > inputs
                     STRING_ADD_STATIC_TEXT(text, text_len, "Minting: ");
