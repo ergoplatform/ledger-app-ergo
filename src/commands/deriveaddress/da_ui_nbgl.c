@@ -20,12 +20,15 @@
 #include "../../ui/ui_main.h"
 #include "../../ui/display.h"
 
-#define PK_APPID_ADDR_SIZE \
-    MAX_BIP32_STRING_LEN + APPLICATION_ID_STR_LEN + 13 + 1 + P2PK_ADDRESS_STRING_MAX_LEN + 9 + 1
-char pk_appid_addr[PK_APPID_ADDR_SIZE];
+char addr_buf[P2PK_ADDRESS_STRING_MAX_LEN];
+char app_id_buf[APPLICATION_ID_STR_LEN];
 
 void ui_display_address_confirm(bool approved) {
     set_flow_response(approved);
+}
+
+void ui_address_flow_end(void) {
+    set_flow_response(true);
 }
 
 int ui_display_address(derive_address_ctx_t* ctx,
@@ -64,44 +67,41 @@ int ui_display_address(derive_address_ctx_t* ctx,
         return res_error(SW_BIP32_BAD_PATH);
     }
 
-    int bip32_str_len = strlen(ctx->bip32_path);
+    int n_pairs = 0;
 
-    memset(pk_appid_addr, 0, PK_APPID_ADDR_SIZE);
-    strncpy(pk_appid_addr, ctx->bip32_path, bip32_str_len);
-    int offset = 0;
+    pairs_global[n_pairs].item = "Derivation path";
+    pairs_global[n_pairs].value = ctx->bip32_path;
+    n_pairs++;
+
     if (app_access_token != 0) {
-        pk_appid_addr[bip32_str_len] = '\n';
-        offset += APPLICATION_ID_STR_LEN + 13;
-        snprintf(*(&pk_appid_addr) + bip32_str_len + 1,
-                 APPLICATION_ID_STR_LEN + 13,
-                 "Application: 0x%08x",
-                 app_access_token);
+        pairs_global[n_pairs++] = ui_application_id_screen(app_access_token, app_id_buf);
     }
 
     if (!send) {
-        pk_appid_addr[bip32_str_len + offset] = '\n';
-        strncpy(*(&pk_appid_addr) + bip32_str_len + offset + 1, "Address: ", 9);
-        strncpy(*(&pk_appid_addr) + bip32_str_len + offset + 1 + 9,
-                ctx->address,
-                MEMBER_SIZE(derive_address_ctx_t, address));
+        strncpy(addr_buf, ctx->address, MEMBER_SIZE(derive_address_ctx_t, address));
     }
+
+    pair_list.nbMaxLinesForValue = 0;
+    pair_list.nbPairs = n_pairs;
+    pair_list.pairs = pairs_global;
 
     if (send) {
         // Confirm Send Address
-        nbgl_useCaseChoice(&WHEEL_ICON,
-                           "Address Export",
-                           pk_appid_addr,
-                           "Confirm",
-                           "Cancel",
-                           ui_display_address_confirm);
+        nbgl_useCaseReviewLight(STATUS_TYPE_ADDRESS_VERIFIED,
+                                &pair_list,
+                                &WHEEL_ICON,
+                                "Address Export",
+                                NULL,
+                                "Confirm address export",
+                                ui_display_address_confirm);
     } else {
         // Confirm Address
-        nbgl_useCaseChoice(&INFO_I_ICON,
-                           "Confirm Address",
-                           pk_appid_addr,
-                           "Confirm",
-                           "Cancel",
-                           ui_display_address_confirm);
+        nbgl_useCaseAddressReview(addr_buf,
+                                  &pair_list,
+                                  &C_app_logo_64px,
+                                  "Verify Ergo address",
+                                  NULL,
+                                  ui_display_address_confirm);
     }
 
     memmove(ctx->raw_address, raw_address, P2PK_ADDRESS_LEN);
@@ -116,10 +116,14 @@ int ui_display_address(derive_address_ctx_t* ctx,
             app_set_current_command(CMD_NONE);
             res_ok();
         }
+        nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_VERIFIED, ui_address_flow_end);
     } else {
         app_set_current_command(CMD_NONE);
         res_deny();
+        nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_REJECTED, ui_address_flow_end);
     }
+
+    io_ui_process();
 
     ui_menu_main();
 
