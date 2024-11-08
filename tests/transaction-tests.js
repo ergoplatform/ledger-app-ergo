@@ -240,7 +240,7 @@ describe("Transaction Tests", function () {
                     .build();
                 const tokensFlow = [
                     { header: 'Token [1]', body: ellipsize(test.model, tokenId) },
-                    { header: 'Token [1] Value', body: '1000' }
+                    { header: 'Token [1] Raw Value', body: '1000' }
                 ];
                 const expectedFlows = signTxFlows(test, auth, from, to, change, tokensFlow);
                 return { appTx, ergoTx, input: uInputs[0],
@@ -270,7 +270,7 @@ describe("Transaction Tests", function () {
                     .build();
                 const tokensFlow = [
                     { header: 'Token [1]', body: ellipsize(test.model, tokenId) },
-                    { header: 'Token [1] Value', body: 'Burning: 1000' }
+                    { header: 'Token [1] Raw Value', body: 'Burning: 1000' }
                 ];
                 const expectedFlows = signTxFlows(test, auth, from, to, change, null, tokensFlow);
                 return { appTx, ergoTx, input: uInputs[0],
@@ -298,11 +298,11 @@ describe("Transaction Tests", function () {
                 const tokenId = uInputs[0].box_id().to_str().toUpperCase();
                 const tokensOutFlow = [
                     { header: 'Token [1]', body: ellipsize(test.model, tokenId) },
-                    { header: 'Token [1] Value', body: '1000' }
+                    { header: 'Token [1] Raw Value', body: '1000' }
                 ];
                 const tokensTxFlow = [
                     { header: 'Token [1]', body: ellipsize(test.model, tokenId) },
-                    { header: 'Token [1] Value', body: 'Minting: 1000' }
+                    { header: 'Token [1] Raw Value', body: 'Minting: 1000' }
                 ];
                 const expectedFlows = signTxFlows(test, auth, from, to, change, tokensOutFlow, tokensTxFlow);
                 return { appTx, ergoTx, input: uInputs[0],
@@ -333,13 +333,13 @@ describe("Transaction Tests", function () {
                 const oTokenId = uInputs[0].box_id().to_str().toUpperCase();
                 const tokensOutFlow = [
                     { header: 'Token [1]', body: ellipsize(test.model, oTokenId) },
-                    { header: 'Token [1] Value', body: '5678' }
+                    { header: 'Token [1] Raw Value', body: '5678' }
                 ];
                 const tokensTxFlow = [
                     { header: 'Token [1]', body: ellipsize(test.model, oTokenId) },
-                    { header: 'Token [1] Value', body: 'Minting: 5678' },
+                    { header: 'Token [1] Raw Value', body: 'Minting: 5678' },
                     { header: 'Token [2]', body: ellipsize(test.model, iTokenId) },
-                    { header: 'Token [2] Value', body: 'Burning: 1234' }
+                    { header: 'Token [2] Raw Value', body: 'Burning: 1234' }
                 ];
                 const expectedFlows = signTxFlows(test, auth, from, to, change, tokensOutFlow, tokensTxFlow);
                 return { appTx, ergoTx, input: uInputs[0],
