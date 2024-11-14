@@ -346,7 +346,7 @@ uint16_t ui_stx_operation_p2pk_show_token_and_path(sign_transaction_operation_p2
     const ux_flow_step_t *b32_step = ui_bip32_path_screen(
         ctx->bip32.path,
         ctx->bip32.len,
-        "P2PK Signing",
+        "Start Signing",
         ctx->ui_approve.bip32_path,
         MEMBER_SIZE(sign_transaction_operation_p2pk_ui_approve_data_ctx_t, bip32_path),
         ui_stx_operation_p2pk_approve_action,
@@ -364,12 +364,12 @@ uint16_t ui_stx_operation_p2pk_show_token_and_path(sign_transaction_operation_p2
     if (!res) {
         return SW_BIP32_FORMATTING_FAILED;
     }
-    // pairs_global[0].item = "P2PK Signing";
+    // pairs_global[0].item = "Start Signing";
     // pairs_global[0].value = ctx->ui_approve.bip32_path;
     // screen++;
     nbgl_useCaseReviewStreamingStart(TYPE_TRANSACTION,
                                      &C_app_logo_64px,
-                                     "P2PK Signing",
+                                     "Start Signing",
                                      ctx->ui_approve.bip32_path,
                                      p2pk_review);
     bool approved = io_ui_process();
@@ -474,7 +474,7 @@ uint16_t ui_stx_operation_p2pk_show_confirm_screen(sign_transaction_operation_p2
     if (!ui_stx_add_transaction_screens(&ctx->ui_confirm,
                                         &screen,
                                         &ctx->amounts,
-                                        1,
+                                        0,
                                         ui_stx_operation_p2pk_show_tx_screen,
                                         ui_stx_operation_p2pk_send_response,
                                         (void *) ctx)) {

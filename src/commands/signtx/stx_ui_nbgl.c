@@ -175,7 +175,7 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
 
     pair_list.nbMaxLinesForValue = 0;
     pair_list.pairs = NULL;
-    pair_list.nbPairs = op_screen_count + 2 + (2 * tokens_count);
+    pair_list.nbPairs = op_screen_count + 1 + (2 * tokens_count);
     pair_list.callback = getSignConfirmPair;
     pair_list.startIndex = 0;
 
@@ -196,7 +196,7 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
 
     if (MAX_NUMBER_OF_SCREENS - *screen < 2) return false;
 
-    nbgl_useCaseReviewStreamingFinish("Approve Signing", ui_stx_operation_approve_action);
+    nbgl_useCaseReviewStreamingFinish("Sign transaction", ui_stx_operation_approve_action);
     approved = io_ui_process();
 
     if (approved) {

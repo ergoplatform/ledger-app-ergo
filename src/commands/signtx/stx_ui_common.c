@@ -24,7 +24,7 @@ uint16_t ui_stx_display_output_state(uint8_t screen, char* title, char* text, vo
                                              text,
                                              text_len);
         case 1: {  // Output Value
-            strncpy(title, "Output Value", title_len);
+            strncpy(title, "Amount", title_len);
             if (!format_erg_amount(ctx->output->value, text, text_len)) {
                 return SW_BUFFER_ERROR;
             }
@@ -67,22 +67,22 @@ uint16_t ui_stx_display_tx_state(uint8_t screen, char* title, char* text, void* 
     }
     screen -= ctx->op_screen_count;
     switch (screen) {
-        case 0: {  // TX Value
+        /*case 0: {  // TX Value
             strncpy(title, "Transaction Amount", title_len);
             if (!format_erg_amount(ctx->amounts->value, text, text_len)) {
                 return SW_BUFFER_ERROR;
             }
             break;
-        }
-        case 1: {  // TX Fee
-            strncpy(title, "Transaction Fee", title_len);
+        }*/
+        case 0: {  // TX Fee
+            strncpy(title, "Fee", title_len);
             if (!format_erg_amount(ctx->amounts->fee, text, text_len)) {
                 return SW_BUFFER_ERROR;
             }
             break;
         }
         default: {        // Tokens
-            screen -= 2;  // Decrease index for info screens
+            screen -= 1;  // Decrease index for info screens
             uint8_t token_idx = stx_amounts_non_zero_token_index(ctx->amounts, screen / 2);
             if (!IS_ELEMENT_FOUND(token_idx)) {  // error. bad index state
                 return SW_BAD_TOKEN_INDEX;

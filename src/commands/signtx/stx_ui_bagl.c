@@ -17,6 +17,7 @@
 #include "../../ergo/address.h"
 #include "../../ui/ui_application_id.h"
 #include "../../ui/ui_approve_reject.h"
+#include "../../ui/ui_sign_reject.h"
 #include "../../ui/ui_dynamic_flow.h"
 #include "../../ui/ui_menu.h"
 #include "../../ui/ui_main.h"
@@ -171,7 +172,7 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
     ui_add_screen(&ux_stx_display_sign_confirm_step, screen);
 
     if (!ui_add_dynamic_flow_screens(screen,
-                                     op_screen_count + 2 + (2 * tokens_count),
+                                     op_screen_count + 1 + (2 * tokens_count),
                                      ctx->title,
                                      ctx->text,
                                      &ui_stx_display_tx_state,
@@ -180,10 +181,10 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
 
     if (MAX_NUMBER_OF_SCREENS - *screen < 2) return false;
 
-    ui_approve_reject_screens(ui_stx_operation_execute_action,
-                              ctx,
-                              ui_next_sreen_ptr(screen),
-                              ui_next_sreen_ptr(screen));
+    ui_sign_reject_screens(ui_stx_operation_execute_action,
+                           ctx,
+                           ui_next_sreen_ptr(screen),
+                           ui_next_sreen_ptr(screen));
 
     ctx->op_screen_count = op_screen_count;
     ctx->op_screen_cb = screen_cb;
