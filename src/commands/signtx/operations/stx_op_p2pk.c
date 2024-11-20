@@ -331,12 +331,6 @@ static NOINLINE void ui_stx_operation_p2pk_approve_action(void *context) {
 }
 #endif
 
-#ifdef HAVE_NBGL
-void p2pk_review(bool approved) {
-    set_flow_response(approved);
-}
-#endif
-
 uint16_t ui_stx_operation_p2pk_show_token_and_path(sign_transaction_operation_p2pk_ctx_t *ctx,
                                                    uint32_t app_access_token,
                                                    bool is_known_application,
@@ -362,20 +356,6 @@ uint16_t ui_stx_operation_p2pk_show_token_and_path(sign_transaction_operation_p2
         ctx->ui_approve.bip32_path,
         MEMBER_SIZE(sign_transaction_operation_p2pk_ui_approve_data_ctx_t, bip32_path));
     if (!res) {
-        return SW_BIP32_FORMATTING_FAILED;
-    }
-    // pairs_global[0].item = "Start Signing";
-    // pairs_global[0].value = ctx->ui_approve.bip32_path;
-    // screen++;
-    nbgl_useCaseReviewStreamingStart(TYPE_TRANSACTION,
-                                     &C_app_logo_64px,
-                                     "Start Signing",
-                                     ctx->ui_approve.bip32_path,
-                                     p2pk_review);
-    bool approved = io_ui_process();
-    if (!approved) {
-        res_deny();
-        ui_menu_main();
         return SW_BIP32_FORMATTING_FAILED;
     }
 #endif
