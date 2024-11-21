@@ -134,15 +134,17 @@ bool ui_stx_add_output_screens(sign_transaction_ui_output_confirm_ctx_t* ctx,
 
     *output_screen = pair_index;
 
-    /*if (!ui_add_dynamic_flow_screens(screen,
-                                     info_screen_count,
-                                     ctx->title,
-                                     ctx->text,
-                                     &ui_stx_display_output_state_render,
-                                     (void*) ctx))
-        return false;*/
-
     if (MAX_NUMBER_OF_SCREENS - *screen < 2) return false;
+
+    explicit_bzero(ctx->last_approved_change, sizeof(sign_transaction_bip32_path_t));
+
+    // store last approved change address
+    if (stx_output_info_type(ctx->output) == SIGN_TRANSACTION_OUTPUT_INFO_TYPE_BIP32) {
+        memmove(ctx->last_approved_change,
+                &ctx->output->bip32_path,
+                sizeof(sign_transaction_bip32_path_t));
+    }
+    res_ok();
 
     return true;
 }

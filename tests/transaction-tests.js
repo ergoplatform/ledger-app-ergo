@@ -17,33 +17,24 @@ function signTxFlows({ device }, auth, from, to, change, tokens_to = undefined, 
     }
     flows[i++].push({ header: null, body: 'Approve' }, { header: null, body: 'Reject' });
     // accept tx screen
-    flows[i] = [{ header: 'P2PK Signing', body: removeMasterNode(from.path.toString()) }];
-    /*if (!auth) {
-        flows[i].push({ header: 'Application', body: '0x00000000' });
-    }*/
-    flows[i++].push({ header: null, body: 'Approve' }, { header: null, body: 'Reject' });
+    if (to || change) {
+        flows[i] = [{ header: 'Start Signing', body: removeMasterNode(from.path.toString()) }];
+    }
     // output screen
     if (to) {
-        flows[i] = [{ header: null, body: 'Confirm Output' },
-                { header: 'Address', body: to.toBase58() },
-                { header: 'Output Value', body: '0.100000000 ERG' }];
+        flows[i].push(...[
+                { header: 'To', body: to.toBase58() },
+                { header: 'Amount', body: '0.100000000 ERG' }]);
         if (tokens_to) { flows[i].push(...tokens_to); }
-        flows[i++].push({ header: null, body: 'Approve' }, { header: null, body: 'Reject' });
     }
     // change screen
     if (change && (from.acc_index != change.acc_index || change.addr_index >= 19)) {
-        flows[i++] = [{ header: null, body: 'Confirm Output' },
-                      { header: 'Change', body: removeMasterNode(change.path.toString()) },
-                      { header: null, body: 'Approve' },
-                      { header: null, body: 'Reject' }];
+        flows[i].push({ header: 'Change', body: removeMasterNode(change.path.toString()) });
     }
     if (to && change) {
-        flows[i] = [{ header: null, body: 'Approve Signing' },
-                { header: 'P2PK Path', body: removeMasterNode(from.path.toString()) },
-                { header: 'Transaction Amount', body: '0.100000000 ERG' },
-                { header: 'Transaction Fee', body: '0.001000000 ERG' }];
+        flows[i].push({ header: 'Fee', body: '0.001000000 ERG' });
         if (tokens_tx) { flows[i].push(...tokens_tx); }
-        flows[i++].push({ header: null, body: 'Approve' }, { header: null, body: 'Reject' });
+        flows[i++].push({ header: null, body: 'Sign transaction' }, { header: null, body: 'Reject' });
     }
     return flows;
 }

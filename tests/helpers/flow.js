@@ -69,6 +69,8 @@ class AuthTokenFlows {
             for (let i = 0; i < flowsCount; i++) {
                 let flow = await this.screens.readFlow();
                 flows.push(mergePagedScreens(flow));
+                // try to click on "Sign transaction" button first
+                await this.screens.clickOn('Sign transaction');
                 await this.screens.clickOn('Approve');
                 if (i != flowsCount - 1 && await this.screens.isReadyMainScreen()) { // we have more flows
                     this.screens.removeCurrentScreen(); // Wait for new screen in the readFlow
