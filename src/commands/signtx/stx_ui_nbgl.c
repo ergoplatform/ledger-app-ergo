@@ -58,6 +58,7 @@ bool ui_stx_add_operation_approve_screens(sign_transaction_ui_aprove_ctx_t* ctx,
 
 bool ui_stx_add_output_screens(sign_transaction_ui_output_confirm_ctx_t* ctx,
                                uint8_t* screen,
+                               uint8_t* output_screen,
                                const sign_transaction_output_info_ctx_t* output,
                                sign_transaction_bip32_path_t* last_approved_change,
                                uint8_t network_id) {
@@ -91,6 +92,8 @@ bool ui_stx_add_output_screens(sign_transaction_ui_output_confirm_ctx_t* ctx,
         pair_index++;
     }
 
+    *output_screen = pair_index;
+
     pair_list.nbPairs += info_screen_count;
 
     explicit_bzero(ctx->last_approved_change, sizeof(sign_transaction_bip32_path_t));
@@ -108,6 +111,7 @@ bool ui_stx_add_output_screens(sign_transaction_ui_output_confirm_ctx_t* ctx,
 
 bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
                                     uint8_t* screen,
+                                    uint8_t* output_screen,
                                     const sign_transaction_amounts_ctx_t* amounts,
                                     uint8_t op_screen_count,
                                     ui_sign_transaction_operation_show_screen_cb screen_cb,
@@ -117,20 +121,8 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
 
     memset(ctx, 0, sizeof(sign_transaction_ui_sign_confirm_ctx_t));
 
-    // p2pk
     sign_transaction_operation_p2pk_ctx_t* base_ctx =
         (sign_transaction_operation_p2pk_ctx_t*) cb_context;
-    bool res = ui_bip32_path_screen(
-        base_ctx->bip32.path,
-        base_ctx->bip32.len,
-        base_ctx->ui_approve.bip32_path,
-        MEMBER_SIZE(sign_transaction_operation_p2pk_ui_approve_data_ctx_t, bip32_path));
-
-    if (!res) {
-        res_deny();
-        app_set_current_command(CMD_NONE);
-        nbgl_useCaseReviewStatus(STATUS_TYPE_TRANSACTION_REJECTED, quit_callback);
-    }
 
     uint8_t tokens_count = stx_amounts_non_zero_tokens_count(amounts);
 
@@ -154,6 +146,8 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
 
         pair_index++;
     }
+
+    *output_screen = pair_index;
 
     pair_list.nbMaxLinesForValue = 0;
     pair_list.pairs = pairs_global;
