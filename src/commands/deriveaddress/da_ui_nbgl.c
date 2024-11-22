@@ -89,8 +89,8 @@ int ui_display_address(derive_address_ctx_t* ctx,
         // Confirm Send Address
         nbgl_useCaseReviewLight(STATUS_TYPE_ADDRESS_VERIFIED,
                                 &pair_list,
-                                &WHEEL_ICON,
-                                "Address Export",
+                                &C_app_logo_64px,
+                                "Export Ergo address",
                                 NULL,
                                 "Confirm address export",
                                 ui_display_address_confirm);
@@ -116,11 +116,21 @@ int ui_display_address(derive_address_ctx_t* ctx,
             app_set_current_command(CMD_NONE);
             res_ok();
         }
-        nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_VERIFIED, ui_address_flow_end);
+
+        if (send) {
+            nbgl_useCaseStatus("Address exported", true, ui_address_flow_end);
+        } else {
+            nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_VERIFIED, ui_address_flow_end);
+        }
     } else {
         app_set_current_command(CMD_NONE);
         res_deny();
-        nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_REJECTED, ui_address_flow_end);
+
+        if (send) {
+            nbgl_useCaseStatus("Address export\ncancelled", false, ui_address_flow_end);
+        } else {
+            nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_REJECTED, ui_address_flow_end);
+        }
     }
 
     io_ui_process();
