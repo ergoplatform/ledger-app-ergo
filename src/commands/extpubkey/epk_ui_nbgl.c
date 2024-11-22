@@ -63,8 +63,8 @@ int ui_display_account(extended_public_key_ctx_t* ctx,
     memmove(ctx->raw_public_key, raw_pub_key, PUBLIC_KEY_LEN);
     memmove(ctx->chain_code, chain_code, CHAIN_CODE_LEN);
 
-    nbgl_useCaseChoice(&WARNING_ICON,
-                       "Ext PubKey Export",
+    nbgl_useCaseChoice(&C_app_logo_64px,
+                       "Export Ergo public key",
                        pk_appid,
                        "Confirm",
                        "Cancel",

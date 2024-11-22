@@ -17,33 +17,24 @@ function signTxFlows({ device }, auth, from, to, change, tokens_to = undefined, 
     }
     flows[i++].push({ header: null, body: 'Approve' }, { header: null, body: 'Reject' });
     // accept tx screen
-    flows[i] = [{ header: 'P2PK Signing', body: removeMasterNode(from.path.toString()) }];
-    /*if (!auth) {
-        flows[i].push({ header: 'Application', body: '0x00000000' });
-    }*/
-    flows[i++].push({ header: null, body: 'Approve' }, { header: null, body: 'Reject' });
+    if (to || change) {
+        flows[i] = [{ header: 'Start Signing', body: removeMasterNode(from.path.toString()) }];
+    }
     // output screen
     if (to) {
-        flows[i] = [{ header: null, body: 'Confirm Output' },
-                { header: 'Address', body: to.toBase58() },
-                { header: 'Output Value', body: '0.100000000 ERG' }];
+        flows[i].push(...[
+                { header: 'To', body: to.toBase58() },
+                { header: 'Amount', body: '0.100000000 ERG' }]);
         if (tokens_to) { flows[i].push(...tokens_to); }
-        flows[i++].push({ header: null, body: 'Approve' }, { header: null, body: 'Reject' });
     }
     // change screen
     if (change && (from.acc_index != change.acc_index || change.addr_index >= 19)) {
-        flows[i++] = [{ header: null, body: 'Confirm Output' },
-                      { header: 'Change', body: removeMasterNode(change.path.toString()) },
-                      { header: null, body: 'Approve' },
-                      { header: null, body: 'Reject' }];
+        flows[i].push({ header: 'Change', body: removeMasterNode(change.path.toString()) });
     }
     if (to && change) {
-        flows[i] = [{ header: null, body: 'Approve Signing' },
-                { header: 'P2PK Path', body: removeMasterNode(from.path.toString()) },
-                { header: 'Transaction Amount', body: '0.100000000 ERG' },
-                { header: 'Transaction Fee', body: '0.001000000 ERG' }];
+        flows[i].push({ header: 'Fee', body: '0.001000000 ERG' });
         if (tokens_tx) { flows[i].push(...tokens_tx); }
-        flows[i++].push({ header: null, body: 'Approve' }, { header: null, body: 'Reject' });
+        flows[i++].push({ header: null, body: 'Sign transaction' }, { header: null, body: 'Reject' });
     }
     return flows;
 }
@@ -240,7 +231,7 @@ describe("Transaction Tests", function () {
                     .build();
                 const tokensFlow = [
                     { header: 'Token [1]', body: ellipsize(test.model, tokenId) },
-                    { header: 'Token [1] Value', body: '1000' }
+                    { header: 'Token [1] Raw Value', body: '1000' }
                 ];
                 const expectedFlows = signTxFlows(test, auth, from, to, change, tokensFlow);
                 return { appTx, ergoTx, input: uInputs[0],
@@ -270,7 +261,7 @@ describe("Transaction Tests", function () {
                     .build();
                 const tokensFlow = [
                     { header: 'Token [1]', body: ellipsize(test.model, tokenId) },
-                    { header: 'Token [1] Value', body: 'Burning: 1000' }
+                    { header: 'Token [1] Raw Value', body: 'Burning: 1000' }
                 ];
                 const expectedFlows = signTxFlows(test, auth, from, to, change, null, tokensFlow);
                 return { appTx, ergoTx, input: uInputs[0],
@@ -298,11 +289,11 @@ describe("Transaction Tests", function () {
                 const tokenId = uInputs[0].box_id().to_str().toUpperCase();
                 const tokensOutFlow = [
                     { header: 'Token [1]', body: ellipsize(test.model, tokenId) },
-                    { header: 'Token [1] Value', body: '1000' }
+                    { header: 'Token [1] Raw Value', body: '1000' }
                 ];
                 const tokensTxFlow = [
                     { header: 'Token [1]', body: ellipsize(test.model, tokenId) },
-                    { header: 'Token [1] Value', body: 'Minting: 1000' }
+                    { header: 'Token [1] Raw Value', body: 'Minting: 1000' }
                 ];
                 const expectedFlows = signTxFlows(test, auth, from, to, change, tokensOutFlow, tokensTxFlow);
                 return { appTx, ergoTx, input: uInputs[0],
@@ -333,13 +324,13 @@ describe("Transaction Tests", function () {
                 const oTokenId = uInputs[0].box_id().to_str().toUpperCase();
                 const tokensOutFlow = [
                     { header: 'Token [1]', body: ellipsize(test.model, oTokenId) },
-                    { header: 'Token [1] Value', body: '5678' }
+                    { header: 'Token [1] Raw Value', body: '5678' }
                 ];
                 const tokensTxFlow = [
                     { header: 'Token [1]', body: ellipsize(test.model, oTokenId) },
-                    { header: 'Token [1] Value', body: 'Minting: 5678' },
+                    { header: 'Token [1] Raw Value', body: 'Minting: 5678' },
                     { header: 'Token [2]', body: ellipsize(test.model, iTokenId) },
-                    { header: 'Token [2] Value', body: 'Burning: 1234' }
+                    { header: 'Token [2] Raw Value', body: 'Burning: 1234' }
                 ];
                 const expectedFlows = signTxFlows(test, auth, from, to, change, tokensOutFlow, tokensTxFlow);
                 return { appTx, ergoTx, input: uInputs[0],

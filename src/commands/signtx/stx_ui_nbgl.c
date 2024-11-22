@@ -39,7 +39,7 @@ bool ui_stx_add_operation_approve_screens(sign_transaction_ui_aprove_ctx_t* ctx,
                                           sign_transaction_ctx_t* sign_tx) {
     if (MAX_NUMBER_OF_SCREENS - *screen < 3) return false;
 
-    int n_pairs = *screen;
+    int n_pairs = 0;
 
     if (!is_known_application && app_access_token != 0) {
         pairs_global[n_pairs++] = ui_application_id_screen(app_access_token, ctx->app_token);
@@ -49,42 +49,16 @@ bool ui_stx_add_operation_approve_screens(sign_transaction_ui_aprove_ctx_t* ctx,
     ctx->sign_tx_context = sign_tx;
     ctx->is_known_application = is_known_application;
 
-    pair_list.nbMaxLinesForValue = 0;
     pair_list.nbPairs = n_pairs;
-    pair_list.pairs = pairs_global;
 
-    bool approved = true;
-    if (n_pairs > 0) {
-        nbgl_useCaseReviewStreamingContinue(&pair_list, ui_stx_operation_approve_action);
-        approved = io_ui_process();
-    }
-
-    ui_stx_operation_approve_reject(approved, ctx);
+    ui_stx_operation_approve_reject(true, ctx);
 
     return true;
 }
 
-static nbgl_layoutTagValue_t pair;
-static sign_transaction_ui_output_confirm_ctx_t* output_screen_ctx = NULL;
-
-static nbgl_layoutTagValue_t* getOutputPair(uint8_t index) {
-    if ((index + 1) % 3 == 0) {
-        pair.item = "";
-        pair.value = "";
-    } else {
-        pair.item = pair_mem_title[index];
-        pair.value = pair_mem_text[index];
-
-        ui_stx_display_output_state(index - index / 3,
-                                    pair_mem_title[index],
-                                    pair_mem_text[index],
-                                    (void*) output_screen_ctx);
-    }
-    return &pair;
-}
-
 bool ui_stx_add_output_screens(sign_transaction_ui_output_confirm_ctx_t* ctx,
                                uint8_t* screen,
+                               uint8_t* output_screen,
                                const sign_transaction_output_info_ctx_t* output,
                                sign_transaction_bip32_path_t* last_approved_change,
                                uint8_t network_id) {
@@ -105,57 +79,39 @@ bool ui_stx_add_output_screens(sign_transaction_ui_output_confirm_ctx_t* ctx,
     ctx->output = output;
     ctx->last_approved_change = last_approved_change;
 
-    pair_list.nbMaxLinesForValue = 0;
-    pair_list.pairs = NULL;
-    pair_list.nbPairs = info_screen_count + info_screen_count / 2;
-    pair_list.callback = getOutputPair;
-    pair_list.startIndex = 0;
+    int pair_index = pair_list.nbPairs;
 
-    output_screen_ctx = ctx;
+    for (int i = 0; i < info_screen_count; i++) {
+        pairs_global[pair_index].item = pair_mem_title[pair_index];
+        pairs_global[pair_index].value = pair_mem_text[pair_index];
 
-    nbgl_useCaseReviewStreamingContinue(&pair_list, ui_stx_operation_approve_action);
-
-    bool approved = io_ui_process();
-    app_set_ui_busy(false);
-    output_screen_ctx = NULL;
-
-    if (!approved) {
-        app_set_current_command(CMD_NONE);
-        res_deny();
-        ui_menu_main();
-        return true;
+        ui_stx_display_output_state(i,
+                                    pair_mem_title[pair_index],
+                                    pair_mem_text[pair_index],
+                                    (void*) ctx);
+        pair_index++;
     }
+
+    *output_screen = pair_index;
+
+    pair_list.nbPairs += info_screen_count;
 
     explicit_bzero(ctx->last_approved_change, sizeof(sign_transaction_bip32_path_t));
 
-    if (approved) {
-        // store last approved change address
-        if (stx_output_info_type(ctx->output) == SIGN_TRANSACTION_OUTPUT_INFO_TYPE_BIP32) {
-            memmove(ctx->last_approved_change,
-                    &ctx->output->bip32_path,
-                    sizeof(sign_transaction_bip32_path_t));
-        }
-        res_ok();
+    // store last approved change address
+    if (stx_output_info_type(ctx->output) == SIGN_TRANSACTION_OUTPUT_INFO_TYPE_BIP32) {
+        memmove(ctx->last_approved_change,
+                &ctx->output->bip32_path,
+                sizeof(sign_transaction_bip32_path_t));
     }
+    res_ok();
 
     return true;
 }
 
-static sign_transaction_ui_sign_confirm_ctx_t* sign_confirm_screen_ctx = NULL;
-
-static nbgl_layoutTagValue_t* getSignConfirmPair(uint8_t index) {
-    pair.item = pair_mem_title[index];
-    pair.value = pair_mem_text[index];
-
-    ui_stx_display_tx_state(index,
-                            pair_mem_title[index],
-                            pair_mem_text[index],
-                            (void*) sign_confirm_screen_ctx);
-    return &pair;
-}
-
 bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
                                     uint8_t* screen,
+                                    uint8_t* output_screen,
                                     const sign_transaction_amounts_ctx_t* amounts,
                                     uint8_t op_screen_count,
                                     ui_sign_transaction_operation_show_screen_cb screen_cb,
@@ -165,6 +121,9 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
 
     memset(ctx, 0, sizeof(sign_transaction_ui_sign_confirm_ctx_t));
 
+    sign_transaction_operation_p2pk_ctx_t* base_ctx =
+        (sign_transaction_operation_p2pk_ctx_t*) cb_context;
+
     uint8_t tokens_count = stx_amounts_non_zero_tokens_count(amounts);
 
     ctx->op_screen_count = op_screen_count;
@@ -173,31 +132,36 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
     ctx->op_cb_context = cb_context;
     ctx->amounts = amounts;
 
-    pair_list.nbMaxLinesForValue = 0;
-    pair_list.pairs = NULL;
-    pair_list.nbPairs = op_screen_count + 2 + (2 * tokens_count);
-    pair_list.callback = getSignConfirmPair;
-    pair_list.startIndex = 0;
+    int pairs_count = op_screen_count + 1 + (2 * tokens_count);
+    int pair_index = pair_list.nbPairs;
 
-    sign_confirm_screen_ctx = ctx;
+    for (int i = 0; i < pairs_count; i++) {
+        pairs_global[pair_index].item = pair_mem_title[pair_index];
+        pairs_global[pair_index].value = pair_mem_text[pair_index];
 
-    nbgl_useCaseReviewStreamingContinue(&pair_list, ui_stx_operation_approve_action);
+        ui_stx_display_tx_state(i,
+                                pair_mem_title[pair_index],
+                                pair_mem_text[pair_index],
+                                (void*) ctx);
 
-    bool approved = io_ui_process();
-    app_set_ui_busy(false);
-    sign_confirm_screen_ctx = NULL;
-
-    if (!approved) {
-        res_deny();
-        app_set_current_command(CMD_NONE);
-        ui_menu_main();
-        return true;
+        pair_index++;
     }
 
-    if (MAX_NUMBER_OF_SCREENS - *screen < 2) return false;
+    *output_screen = pair_index;
 
-    nbgl_useCaseReviewStreamingFinish("Approve Signing", ui_stx_operation_approve_action);
-    approved = io_ui_process();
+    pair_list.nbMaxLinesForValue = 0;
+    pair_list.pairs = pairs_global;
+    pair_list.nbPairs = pair_index;
+    pair_list.startIndex = 0;
+
+    nbgl_useCaseReview(TYPE_TRANSACTION,
+                       &pair_list,
+                       &C_app_logo_64px,
+                       "Start Signing",
+                       base_ctx->ui_approve.bip32_path,
+                       "Sign transaction",
+                       ui_stx_operation_approve_action);
+    bool approved = io_ui_process();
 
     if (approved) {
         ctx->op_response_cb(ctx->op_cb_context);

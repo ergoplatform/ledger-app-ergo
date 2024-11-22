@@ -5,7 +5,7 @@
 #include <nbgl_use_case.h>
 #include <os.h>
 
-#define APPTAGLINE   "Ergo app for ledger"
+#define APPTAGLINE   "This app enables signing\ntransactions on the Ergo\nnetwork."
 #define APPCOPYRIGHT "Ergo App (c) 2024"
 
 #define SETTING_INFO_NB 2

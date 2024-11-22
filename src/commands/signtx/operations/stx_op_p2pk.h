@@ -40,11 +40,11 @@ typedef struct {
     cx_blake2b_t tx_hash;
     uint8_t network_id;
     sign_transaction_amounts_ctx_t amounts;
-    union {
-        sign_transaction_operation_p2pk_transaction_ctx_t transaction;
-        sign_transaction_operation_p2pk_ui_approve_data_ctx_t ui_approve;
-        sign_transaction_ui_sign_confirm_ctx_t ui_confirm;
-    };
+
+    sign_transaction_operation_p2pk_transaction_ctx_t transaction;
+    sign_transaction_operation_p2pk_ui_approve_data_ctx_t ui_approve;
+    sign_transaction_ui_sign_confirm_ctx_t ui_confirm;
+
 } sign_transaction_operation_p2pk_ctx_t;
 
 //****************** OPERATION CALLS ****************

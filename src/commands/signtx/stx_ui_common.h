@@ -70,7 +70,7 @@ static inline uint16_t output_info_print_address(const sign_transaction_output_i
         }
         case SIGN_TRANSACTION_OUTPUT_INFO_TYPE_ADDRESS: {
             uint8_t raw_address[P2PK_ADDRESS_LEN];
-            strncpy(title, "Address", title_len);
+            strncpy(title, "To", title_len);
             if (!ergo_address_from_compressed_pubkey(network_id, ctx->public_key, raw_address)) {
                 return SW_ADDRESS_GENERATION_FAILED;
             }
