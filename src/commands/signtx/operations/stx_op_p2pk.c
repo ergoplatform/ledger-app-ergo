@@ -337,7 +337,7 @@ uint16_t ui_stx_operation_p2pk_show_token_and_path(sign_transaction_operation_p2
     const ux_flow_step_t *b32_step = ui_bip32_path_screen(
         ctx->bip32.path,
         ctx->bip32.len,
-        "Start Signing",
+        "Review transaction",
         ctx->ui_approve.bip32_path,
         MEMBER_SIZE(sign_transaction_operation_p2pk_ui_approve_data_ctx_t, bip32_path),
         NULL,

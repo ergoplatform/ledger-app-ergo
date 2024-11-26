@@ -157,7 +157,7 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
     nbgl_useCaseReview(TYPE_TRANSACTION,
                        &pair_list,
                        &C_app_logo_64px,
-                       "Start Signing",
+                       "Review transaction",
                        base_ctx->ui_approve.bip32_path,
                        "Sign transaction",
                        ui_stx_operation_approve_action);
