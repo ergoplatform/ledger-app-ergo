@@ -18,7 +18,7 @@ function signTxFlows({ device }, auth, from, to, change, tokens_to = undefined, 
     flows[i++].push({ header: null, body: 'Approve' }, { header: null, body: 'Reject' });
     // accept tx screen
     if (to || change) {
-        flows[i] = [{ header: 'Start Signing', body: removeMasterNode(from.path.toString()) }];
+        flows[i] = [{ header: 'Review transaction', body: removeMasterNode(from.path.toString()) }];
     }
     // output screen
     if (to) {
