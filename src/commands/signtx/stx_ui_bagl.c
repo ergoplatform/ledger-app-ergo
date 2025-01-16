@@ -69,7 +69,7 @@ bool ui_stx_add_operation_approve_screens(sign_transaction_ui_aprove_ctx_t* ctx,
 
 // --- OUTPUT APPROVE / REJECT FLOW
 
-static NOINLINE void ui_stx_operation_output_confirm_action(bool approved, void* context) {
+static NOINLINE bool ui_stx_operation_output_confirm_action(bool approved, void* context) {
     sign_transaction_ui_output_confirm_ctx_t* ctx =
         (sign_transaction_ui_output_confirm_ctx_t*) context;
     app_set_ui_busy(false);
@@ -83,14 +83,15 @@ static NOINLINE void ui_stx_operation_output_confirm_action(bool approved, void*
                     &ctx->output->bip32_path,
                     sizeof(sign_transaction_bip32_path_t));
         }
-        res_ok();
-        return;
+        // res_ok();
+        return true;
     } else {
         app_set_current_command(CMD_NONE);
-        res_deny();
+        // res_deny();
     }
 
     ui_menu_main();
+    return false;
 }
 
 uint16_t ui_stx_dynamic_display(uint8_t screen, char* title, char* text) {
@@ -120,7 +121,10 @@ bool ui_stx_add_output_screens(sign_transaction_ui_output_confirm_ctx_t* ctx,
     ctx->output = output;
     ctx->last_approved_change = last_approved_change;
 
-    ui_stx_operation_output_confirm_action(true, ctx);
+    if (!ui_stx_operation_output_confirm_action(true, ctx)) {
+        res_deny();
+        return false;
+    }
 
     int pair_index = *output_screen;
 
