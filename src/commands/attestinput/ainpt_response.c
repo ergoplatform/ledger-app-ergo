@@ -40,7 +40,10 @@ int send_response_attested_input_frame(attest_input_ctx_t *ctx,
     CHECK_WRITE_PARAM(rw_buffer_write_u8(&output, tokens_count));
 
     uint8_t offset = index * FRAME_MAX_TOKENS_COUNT;
-    for (uint8_t i = offset; i < offset + tokens_count; i++) {
+    if (offset + tokens_count > 255) {
+        return send_error(SW_TOO_MUCH_DATA);
+    }
+    for (uint8_t i = offset; i < (uint8_t) (offset + tokens_count); i++) {
         CHECK_WRITE_PARAM(rw_buffer_write_bytes(&output, ctx->tokens_table.tokens[i], ERGO_ID_LEN));
         CHECK_WRITE_PARAM(rw_buffer_write_u64(&output, ctx->token_amounts[i], BE));
     }
