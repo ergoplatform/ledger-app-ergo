@@ -31,6 +31,7 @@ void ui_address_flow_end(void) {
     set_flow_response(true);
 }
 
+// Display
 int ui_display_address(derive_address_ctx_t* ctx,
                        bool send,
                        uint32_t app_access_token,
