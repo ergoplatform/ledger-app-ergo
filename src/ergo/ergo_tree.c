@@ -72,12 +72,7 @@ bool ergo_tree_parse_p2sh(const uint8_t tree[ERGO_TREE_P2SH_LEN],
 }
 
 void ergo_tree_miners_fee_tree(bool is_mainnet, const uint8_t** tree, size_t* size) {
-    // if (is_mainnet) {
     UNUSED(is_mainnet);
     *size = sizeof(C_ERGO_TREE_MINERS_HASH_FEE_MAINNET);
     *tree = PIC(C_ERGO_TREE_MINERS_HASH_FEE_MAINNET);
-    // } else {
-    // *size = sizeof(C_ERGO_TREE_MINERS_HASH_FEE_TESTNET);
-    // *tree = PIC(C_ERGO_TREE_MINERS_HASH_FEE_TESTNET);
-    // }
 }
