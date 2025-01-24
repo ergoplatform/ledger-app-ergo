@@ -45,9 +45,6 @@ bool bip32_path_validate(const uint32_t *bip32_path,
         case BIP32_PATH_VALIDATE_ACCOUNT_E3:
             return bip32_path_len == 3 && bip32_path[2] >= BIP32_HARDENED_CONSTANT;
         case BIP32_PATH_VALIDATE_ACCOUNT_GE3:
-            if (bip32_path_len < 3) {
-                return false;
-            }
             for (uint8_t i = 2; i < bip32_path_len; i++) {
                 if (bip32_path[i] < BIP32_HARDENED_CONSTANT) {
                     return false;

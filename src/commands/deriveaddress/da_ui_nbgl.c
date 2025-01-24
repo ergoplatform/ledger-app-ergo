@@ -31,6 +31,7 @@ void ui_address_flow_end(void) {
     set_flow_response(true);
 }
 
+// Display
 int ui_display_address(derive_address_ctx_t* ctx,
                        bool send,
                        uint32_t app_access_token,
@@ -45,6 +46,7 @@ int ui_display_address(derive_address_ctx_t* ctx,
         return send_error(SW_BIP32_BAD_PATH);
     }
 
+    // Set required context fields
     ctx->app_token_value = app_access_token;
     ctx->send = send;
 
@@ -69,10 +71,12 @@ int ui_display_address(derive_address_ctx_t* ctx,
 
     int n_pairs = 0;
 
+    // Prepare derivation path display pair
     pairs_global[n_pairs].item = "Derivation path";
     pairs_global[n_pairs].value = ctx->bip32_path;
     n_pairs++;
 
+    // Add application id display pair if app_access_token is not equal to zero
     if (app_access_token != 0) {
         pairs_global[n_pairs++] = ui_application_id_screen(app_access_token, app_id_buf);
     }
@@ -81,6 +85,7 @@ int ui_display_address(derive_address_ctx_t* ctx,
         strncpy(addr_buf, ctx->address, MEMBER_SIZE(derive_address_ctx_t, address));
     }
 
+    // Prepare pair_list before showing review screen
     pair_list.nbMaxLinesForValue = 0;
     pair_list.nbPairs = n_pairs;
     pair_list.pairs = pairs_global;
@@ -117,6 +122,7 @@ int ui_display_address(derive_address_ctx_t* ctx,
             res_ok();
         }
 
+        // Show result screen
         if (send) {
             nbgl_useCaseStatus("Address exported", true, ui_address_flow_end);
         } else {
@@ -126,6 +132,7 @@ int ui_display_address(derive_address_ctx_t* ctx,
         app_set_current_command(CMD_NONE);
         res_deny();
 
+        // Show result screen
         if (send) {
             nbgl_useCaseStatus("Address export\ncancelled", false, ui_address_flow_end);
         } else {

@@ -66,48 +66,38 @@ uint16_t ui_stx_display_tx_state(uint8_t screen, char* title, char* text, void* 
         return ctx->op_screen_cb(screen, title, title_len, text, text_len, ctx->op_cb_context);
     }
     screen -= ctx->op_screen_count;
-    switch (screen) {
-        /*case 0: {  // TX Value
-            strncpy(title, "Transaction Amount", title_len);
-            if (!format_erg_amount(ctx->amounts->value, text, text_len)) {
-                return SW_BUFFER_ERROR;
-            }
-            break;
-        }*/
-        case 0: {  // TX Fee
-            strncpy(title, "Fee", title_len);
-            if (!format_erg_amount(ctx->amounts->fee, text, text_len)) {
-                return SW_BUFFER_ERROR;
-            }
-            break;
+    if (screen == 0) {
+        strncpy(title, "Fee", title_len);
+        if (!format_erg_amount(ctx->amounts->fee, text, text_len)) {
+            return SW_BUFFER_ERROR;
         }
-        default: {        // Tokens
-            screen -= 1;  // Decrease index for info screens
-            uint8_t token_idx = stx_amounts_non_zero_token_index(ctx->amounts, screen / 2);
-            if (!IS_ELEMENT_FOUND(token_idx)) {  // error. bad index state
-                return SW_BAD_TOKEN_INDEX;
+    } else {
+        // Tokens
+        screen -= 1;  // Decrease index for info screens
+        uint8_t token_idx = stx_amounts_non_zero_token_index(ctx->amounts, screen / 2);
+        if (!IS_ELEMENT_FOUND(token_idx)) {  // error. bad index state
+            return SW_BAD_TOKEN_INDEX;
+        }
+        if (screen % 2 == 0) {  // Token ID
+            snprintf(title, title_len, "Token [%d]", (int) (screen / 2) + 1);
+            if (!format_hex_id(ctx->amounts->tokens_table.tokens[token_idx],
+                               ERGO_ID_LEN,
+                               text,
+                               text_len)) {
+                return SW_ADDRESS_FORMATTING_FAILED;
             }
-            if (screen % 2 == 0) {  // Token ID
-                snprintf(title, title_len, "Token [%d]", (int) (screen / 2) + 1);
-                if (!format_hex_id(ctx->amounts->tokens_table.tokens[token_idx],
-                                   ERGO_ID_LEN,
-                                   text,
-                                   text_len)) {
-                    return SW_ADDRESS_FORMATTING_FAILED;
-                }
-            } else {  // Token Value
-                snprintf(title, title_len, "Token [%d] Raw Value", (int) (screen / 2) + 1);
-                int64_t value = ctx->amounts->tokens[token_idx];
-                if (value < 0) {  // output > inputs
-                    STRING_ADD_STATIC_TEXT(text, text_len, "Minting: ");
-                    format_u64(text, text_len, -value);
-                } else {  // inputs > outputs
-                    STRING_ADD_STATIC_TEXT(text, text_len, "Burning: ");
-                    format_u64(text, text_len, value);
-                }
+        } else {  // Token Value
+            snprintf(title, title_len, "Token [%d] Raw Value", (int) (screen / 2) + 1);
+            int64_t value = ctx->amounts->tokens[token_idx];
+            if (value < 0) {  // output > inputs
+                STRING_ADD_STATIC_TEXT(text, text_len, "Minting: ");
+                format_u64(text, text_len, -value);
+            } else {  // inputs > outputs
+                STRING_ADD_STATIC_TEXT(text, text_len, "Burning: ");
+                format_u64(text, text_len, value);
             }
-            break;
         }
     }
+
     return SW_OK;
 }

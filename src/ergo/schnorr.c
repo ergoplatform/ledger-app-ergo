@@ -41,7 +41,7 @@ bool ergo_secp256k1_schnorr_p2pk_sign_init(cx_blake2b_t* hash,
             // check private key has a proper value
             if (cx_math_is_zero(secret, PRIVATE_KEY_LEN)) break;
             if (cx_math_cmp_no_throw(secret, PIC(SECP256K1_N), PRIVATE_KEY_LEN, &cmp_diff) != 0 ||
-                cmp_diff > 0)
+                cmp_diff >= 0)
                 break;
 
             // pk = G * secret (pub key)

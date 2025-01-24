@@ -83,11 +83,9 @@ static NOINLINE bool ui_stx_operation_output_confirm_action(bool approved, void*
                     &ctx->output->bip32_path,
                     sizeof(sign_transaction_bip32_path_t));
         }
-        // res_ok();
         return true;
     } else {
         app_set_current_command(CMD_NONE);
-        // res_deny();
     }
 
     ui_menu_main();

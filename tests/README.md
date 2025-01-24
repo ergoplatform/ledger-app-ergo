@@ -12,13 +12,14 @@ npm install
 First start your application with Speculos
 
 ```
-./path/to/speculos.py /path/to/bin/app.elf --apdu-port 9999 --api-port 40000
+export SEED=`cat '/path/to/tests/seed.txt'`
+./path/to/speculos.py /path/to/bin/app.elf --apdu-port 9999 --seed "$SEED"
 ```
 
 then run
 
 ```
-npm run test
+npm run test --model=<model>
 ```
 
 ### Launch with your Nano S+/X
@@ -26,5 +27,7 @@ npm run test
 Be sure to have you device connected through USB (without any other software interacting with it) and run
 
 ```
-LEDGER_LIVE_HARDWARE=1 npm run test
+LEDGER_LIVE_HARDWARE=1 npm run test --model=<model>
 ```
+
+`<model>` can be either `nanox` or `nanosp`
