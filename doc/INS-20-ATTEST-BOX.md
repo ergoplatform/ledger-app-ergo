@@ -82,7 +82,7 @@ If Box is finished then 1 byte of the data (amount of frames) or empty if more d
 
 ## 0x04 - Add Registers chunk
 
-Add Registers data chunk to the current Box. Can be used only when Box has additional registers size > 0.
+Add Registers data chunk to the current Box. Can be used only when Box has additional registers size > 0. Can be used only after tokens added.
 
 ### Request
 | INS | P1 | P2 | Lc | Data |
