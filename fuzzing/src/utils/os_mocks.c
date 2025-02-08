@@ -191,14 +191,7 @@ cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
 }
 
 cx_err_t cx_ecdomain_parameters_length(cx_curve_t cv, size_t *length) {
-    // cardano uses CX_CURVE_Ed25519
-    if (cv == CX_CURVE_Ed25519) {
-        *length = 32;
-        return CX_OK;
-    }
-
-    exit(1);
-    return CX_INVALID_PARAMETER;
+    return CX_OK;
 }
 
 void os_perso_derive_node_with_seed_key(unsigned int mode,
