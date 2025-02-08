@@ -7,6 +7,9 @@
 #include <string.h>
 #include <ux.h>
 #include <buffer.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 // Code taken from: https://github.com/LedgerHQ/app-cardano/blob/develop/fuzzing/src/os_mocks.c
 
@@ -105,6 +108,8 @@ cx_err_t cx_ecfp_generate_pair_no_throw(cx_curve_t             curve,
     return CX_OK;
 };
 void cx_rng_no_throw(uint8_t *buffer, size_t len) {
+    int fd = open("/dev/random", O_RDONLY);
+    read(fd, buffer, len);
 };
 size_t cx_hash_get_size(const cx_hash_t *ctx) {
     return 32;
