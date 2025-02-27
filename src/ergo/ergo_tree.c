@@ -2,7 +2,7 @@
 #include <os.h>
 #include <string.h>
 #include "address.h"
-#include "../common/buffer.h"
+#include "../common/rwbuffer.h"
 
 static const uint8_t C_ERGO_TREE_P2PK_PREFIX[ERGO_TREE_P2PK_PREFIX_LEN] = {0x00, 0x08, 0xcd};
 
@@ -35,14 +35,14 @@ static const uint8_t C_ERGO_TREE_MINERS_HASH_FEE_MAINNET[105] = {
 
 void ergo_tree_generate_p2pk(const uint8_t raw_public_key[static PUBLIC_KEY_LEN],
                              uint8_t tree[ERGO_TREE_P2PK_LEN]) {
-    BUFFER_FROM_ARRAY_EMPTY(out, tree, ERGO_TREE_P2PK_LEN);
+    RW_BUFFER_FROM_ARRAY_EMPTY(out, tree, ERGO_TREE_P2PK_LEN);
 
     // Prefix
-    buffer_write_bytes(&out, PIC(C_ERGO_TREE_P2PK_PREFIX), ERGO_TREE_P2PK_PREFIX_LEN);
+    rw_buffer_write_bytes(&out, PIC(C_ERGO_TREE_P2PK_PREFIX), ERGO_TREE_P2PK_PREFIX_LEN);
 
     // Compressed pubkey
-    buffer_write_u8(&out, ((raw_public_key[64] & 1) ? 0x03 : 0x02));
-    buffer_write_bytes(&out, raw_public_key + 1, 32);
+    rw_buffer_write_u8(&out, ((raw_public_key[64] & 1) ? 0x03 : 0x02));
+    rw_buffer_write_bytes(&out, raw_public_key + 1, 32);
 }
 
 bool ergo_tree_parse_p2pk(const uint8_t tree[ERGO_TREE_P2PK_LEN],
@@ -72,12 +72,7 @@ bool ergo_tree_parse_p2sh(const uint8_t tree[ERGO_TREE_P2SH_LEN],
 }
 
 void ergo_tree_miners_fee_tree(bool is_mainnet, const uint8_t** tree, size_t* size) {
-    // if (is_mainnet) {
     UNUSED(is_mainnet);
     *size = sizeof(C_ERGO_TREE_MINERS_HASH_FEE_MAINNET);
     *tree = PIC(C_ERGO_TREE_MINERS_HASH_FEE_MAINNET);
-    // } else {
-    // *size = sizeof(C_ERGO_TREE_MINERS_HASH_FEE_TESTNET);
-    // *tree = PIC(C_ERGO_TREE_MINERS_HASH_FEE_TESTNET);
-    // }
 }

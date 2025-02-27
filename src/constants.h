@@ -38,7 +38,7 @@
 /**
  * Maximum number of tokens in TX.
  */
-#define TOKEN_MAX_COUNT 20
+#define TOKEN_MAX_COUNT 100
 
 /**
  * Length of Session Key.
@@ -83,7 +83,7 @@
 /**
  * Max number of screens
  */
-#define MAX_NUMBER_OF_SCREENS 8
+#define MAX_NUMBER_OF_SCREENS 16
 
 /**
  * Max length of TX data part

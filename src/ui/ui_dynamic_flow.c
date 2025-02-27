@@ -1,10 +1,13 @@
+#ifdef HAVE_BAGL
+
 #include "ui_dynamic_flow.h"
 
-#include "../globals.h"
 #include "../constants.h"
+#include "../context.h"
 #include "../helpers/response.h"
-#include "../common/macros.h"
+#include "../common/macros_ext.h"
 #include "ui_menu.h"
+#include "ui_main.h"
 
 #include <ux.h>
 
@@ -12,7 +15,6 @@ struct ui_dynamic_flow_ctx_t {
     uint8_t screen_count;
     uint8_t current_screen;
     ui_dynamic_flow_show_screen_cb show_cb;
-    void *cb_context;
 };
 
 static ux_layout_bnnn_paging_params_t G_ui_dynamic_step_params[1];
@@ -32,13 +34,12 @@ void bnnn_paging_edgecase() {
     do {                                                                                          \
         uint16_t res = G_dynamic_flow_context.show_cb(G_dynamic_flow_context.current_screen,      \
                                                       (char *) G_ui_dynamic_step_params[0].title, \
-                                                      (char *) G_ui_dynamic_step_params[0].text,  \
-                                                      G_dynamic_flow_context.cb_context);         \
+                                                      (char *) G_ui_dynamic_step_params[0].text); \
         if (res == SW_OK) {                                                                       \
             switch_method();                                                                      \
         } else {                                                                                  \
+            app_set_current_command(CMD_NONE);                                                    \
             res_error(res);                                                                       \
-            clear_context(&G_context, CMD_NONE);                                                  \
             ui_menu_main();                                                                       \
         }                                                                                         \
     } while (0)
@@ -88,21 +89,21 @@ bool ui_add_dynamic_flow_screens(uint8_t *screen,
                                  uint8_t dynamic_screen_count,
                                  char *title_storage,
                                  char *text_storage,
-                                 ui_dynamic_flow_show_screen_cb show_cb,
-                                 void *cb_ctx) {
+                                 ui_dynamic_flow_show_screen_cb show_cb) {
     if (MAX_NUMBER_OF_SCREENS - *screen < 3) return false;
     if (dynamic_screen_count == 0 || dynamic_screen_count == INDEX_NOT_EXIST) return false;
 
     G_ui_dynamic_step_params[0].title = title_storage;
     G_ui_dynamic_step_params[0].text = text_storage;
-    G_dynamic_flow_context.cb_context = cb_ctx;
     G_dynamic_flow_context.screen_count = dynamic_screen_count;
     G_dynamic_flow_context.current_screen = INDEX_NOT_EXIST;
     G_dynamic_flow_context.show_cb = show_cb;
 
-    G_ux_flow[(*screen)++] = &ux_dynamic_upper_delimiter_step;
-    G_ux_flow[(*screen)++] = &ux_dynamic_step;
-    G_ux_flow[(*screen)++] = &ux_dynamic_lower_delimiter_step;
+    ui_add_screen(&ux_dynamic_upper_delimiter_step, screen);
+    ui_add_screen(&ux_dynamic_step, screen);
+    ui_add_screen(&ux_dynamic_lower_delimiter_step, screen);
 
     return true;
 }
+
+#endif

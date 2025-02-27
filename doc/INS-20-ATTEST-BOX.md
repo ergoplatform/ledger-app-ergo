@@ -34,10 +34,10 @@ To avoid any confusion, Authorization Token and Session ID are two different val
 | Transaction ID | 32 | ID of the Transaction containing this Box |
 | Box Index | 2 | Box index in the Transaction. Big-endian |
 | Value | 8 | Box value. Big-endian. |
-| Ergo Tree Size | 4 | Size in bytes of serialized Ergo Tree data. Big-endian. |
+| Ergo Tree Size | 4 | Size in bytes of serialized Ergo Tree data. Big-endian. Limited to 32768 bytes |
 | Creation Height | 4 | Big-endian |
 | Tokens Count | 1 | Tokens count inside the Box |
-| Additional Registers Size | 4 | Size in bytes of serialized Additional Registers data. Big-endian |
+| Additional Registers Size | 4 | Size in bytes of serialized Additional Registers data. Big-endian. Limited to 32768 bytes |
 | [Optional] Auth Token | 4 | Big-endian. Randomly generated value. Becomes an ID for the session for future use, i.e. once transaction signing is requested. If present, **P2** should be set to 0x02 |
 
 ### Response
@@ -82,7 +82,7 @@ If Box is finished then 1 byte of the data (amount of frames) or empty if more d
 
 ## 0x04 - Add Registers chunk
 
-Add Registers data chunk to the current Box. Can be used only when Box has additional registers size > 0.
+Add Registers data chunk to the current Box. Can be used only when Box has additional registers size > 0 and after tokens have been added.
 
 ### Request
 | INS | P1 | P2 | Lc | Data |

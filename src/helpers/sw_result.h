@@ -51,6 +51,8 @@ static inline uint16_t sw_from_tx_full_result(ergo_tx_serializer_full_result_e r
         case ERGO_TX_SERIALIZER_FULL_RES_ERR_SMALL_CHUNK:
             return SW_SMALL_CHUNK;
     }
+
+    return SW_BAD_STATE;
 }
 
 static inline uint16_t sw_from_tx_box_result(ergo_tx_serializer_box_result_e res) {
@@ -80,4 +82,6 @@ static inline uint16_t sw_from_tx_box_result(ergo_tx_serializer_box_result_e res
         case ERGO_TX_SERIALIZER_BOX_RES_ERR_SMALL_CHUNK:
             return SW_SMALL_CHUNK;
     }
+
+    return SW_BAD_STATE;
 }
