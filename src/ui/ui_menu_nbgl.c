@@ -44,7 +44,7 @@ void app_quit(void) {
     os_sched_exit(-1);
 }
 
-static void controls_callback(int token, uint8_t index, int page) {
+static void controls_callback(int token, uint8_t index, __attribute__((unused)) int page) {
     UNUSED(index);
 
     uint8_t switch_value;
