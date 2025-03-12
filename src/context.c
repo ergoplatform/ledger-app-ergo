@@ -8,6 +8,9 @@
 // Saved here to store it outside of the stack
 app_ctx_t G_app_context;
 
+// Internal storage
+const internal_storage_t N_storage_real;
+
 void app_init(void) {
     // Clear context
     explicit_bzero(&G_app_context, sizeof(app_ctx_t));
