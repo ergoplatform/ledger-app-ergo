@@ -30,6 +30,12 @@ static inline uint16_t handler_err(sign_transaction_operation_p2pk_ctx_t *ctx, u
     return err;
 }
 
+// Check if tx should use blind signing ui
+static inline bool is_blind_signing_tx(const sign_transaction_output_info_ctx_t *output) {
+    return STX_OUTPUT_INFO_TYPE(output) != SIGN_TRANSACTION_OUTPUT_INFO_TYPE_ADDRESS &&
+           STX_OUTPUT_INFO_TYPE(output) != SIGN_TRANSACTION_OUTPUT_INFO_TYPE_MINERS_FEE;
+}
+
 static NOINLINE ergo_tx_serializer_input_result_e
 p2pk_input_token_cb(const uint8_t box_id[static ERGO_ID_LEN],
                     const uint8_t tn_id[static ERGO_ID_LEN],
@@ -96,6 +102,7 @@ uint16_t stx_operation_p2pk_init(sign_transaction_operation_p2pk_ctx_t *ctx,
     ctx->bip32.len = bip32_path_len;
     ctx->network_id = network_id;
     ctx->state = SIGN_TRANSACTION_OPERATION_P2PK_STATE_INITIALIZED;
+    ctx->blind_signing_required = 0;
 
     return SW_OK;
 }
@@ -373,6 +380,10 @@ uint16_t ui_stx_operation_p2pk_show_output_confirm_screen(
                         SIGN_TRANSACTION_OPERATION_P2PK_STATE_OUTPUTS_STARTED,
                         SIGN_TRANSACTION_OPERATION_P2PK_STATE_TX_FINISHED);
 
+    if (is_blind_signing_tx(&ctx->transaction.ui.output)) {
+        ctx->blind_signing_required = 1;
+    }
+
     if (!ui_stx_add_output_screens(&ctx->transaction.ui.ui,
                                    &signtx_screen,
                                    &signtx_outputs_screen,
@@ -441,6 +452,7 @@ uint16_t ui_stx_operation_p2pk_show_confirm_screen(sign_transaction_operation_p2
                                         &signtx_screen,
                                         &signtx_outputs_screen,
                                         &ctx->amounts,
+                                        ctx->blind_signing_required,
                                         0,
                                         ui_stx_operation_p2pk_show_tx_screen,
                                         ui_stx_operation_p2pk_send_response,
