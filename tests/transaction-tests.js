@@ -20,6 +20,9 @@ function signTxFlows({ device }, auth, from, to, change, tokens_to = undefined, 
     if (to || change) {
         flows[i] = [{ header: 'Review transaction', body: removeMasterNode(from.path.toString()) }];
     }
+    if (change && (from.acc_index != change.acc_index || change.addr_index >= 19)) {
+        flows[i].push({ header: 'Blind', body: 'signing' });
+    }
     // output screen
     if (to) {
         flows[i].push(...[
