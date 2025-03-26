@@ -334,6 +334,43 @@ bool stx_operation_p2pk_should_show_output_confirm_screen(
 
 static uint8_t signtx_screen = 0;
 static uint8_t signtx_outputs_screen = 0;
+
+#ifdef HAVE_BAGL
+static void blind_signing_callback(bool is_settings) {
+    if (is_settings) {
+        res_deny();
+        ui_menu_settings();
+    } else {
+        res_deny();
+        ui_menu_main();
+    }
+}
+
+UX_STEP_NOCB(ux_stx_blind_signing_step, pbb, {&C_icon_warning, "Blind", "signing"});
+UX_STEP_NOCB(ux_stx_blind_signing_enable_warn1_step,
+             pbb,
+             {&C_icon_warning, "Transaction cannot", "be clear-signed"});
+UX_STEP_NOCB(ux_stx_blind_signing_enable_warn2_step,
+             bnnn_paging,
+             {.title = "Blind signing",
+              .text = "Enable blind signing in the settings to sign this transaction."});
+UX_STEP_CB(ux_stx_blind_signing_enable_settings_step,
+           pb,
+           blind_signing_callback(true),
+           {
+               &C_icon_coggle,
+               "Go to settings",
+           });
+// Step with reject button
+UX_STEP_CB(ux_stx_blind_signing_enable_txreject_step,
+           pb,
+           blind_signing_callback(false),
+           {
+               &C_icon_crossmark,
+               "Reject transaction",
+           });
+#endif
+
 uint16_t ui_stx_operation_p2pk_show_token_and_path(sign_transaction_operation_p2pk_ctx_t *ctx,
                                                    uint32_t app_access_token,
                                                    bool is_known_application,
@@ -382,6 +419,25 @@ uint16_t ui_stx_operation_p2pk_show_output_confirm_screen(
 
     if (is_blind_signing_tx(&ctx->transaction.ui.output)) {
         ctx->blind_signing_required = 1;
+
+#ifdef HAVE_BAGL
+        if (!N_storage.blind_signing_enabled) {
+            // cannot be clear signed window
+            ui_add_screen(&ux_stx_blind_signing_enable_warn1_step, &signtx_screen);
+            ui_add_screen(&ux_stx_blind_signing_enable_warn2_step, &signtx_screen);
+            ui_add_screen(&ux_stx_blind_signing_enable_settings_step, &signtx_screen);
+            ui_add_screen(&ux_stx_blind_signing_enable_txreject_step, &signtx_screen);
+
+            if (!ui_stx_display_screens(signtx_screen)) {
+                return SW_SCREENS_BUFFER_OVERFLOW;
+            }
+
+            return SW_OK;
+        } else {
+            // blind signing screen
+            ui_add_screen(&ux_stx_blind_signing_step, &signtx_screen);
+        }
+#endif
     }
 
     if (!ui_stx_add_output_screens(&ctx->transaction.ui.ui,
