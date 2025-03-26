@@ -76,6 +76,9 @@ void ui_menu_main() {
                                 app_quit);
 }
 
+void ui_menu_settings() {
+}
+
 void ui_menu_about() {
     nbgl_useCaseHomeAndSettings(APPNAME,
                                 &C_app_logo_64px,

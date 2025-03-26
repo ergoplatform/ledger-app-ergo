@@ -13,5 +13,6 @@ const bagl_icon_details_t C_icon_app = {0};
 const bagl_icon_details_t C_icon_dashboard_x = {0};
 const bagl_icon_details_t C_icon_back = {0};
 const bagl_icon_details_t C_icon_certificate = {0};
+const bagl_icon_details_t C_icon_coggle = {0};
 const bagl_icon_details_t C_app_logo_16px = {0};
 const bagl_icon_details_t C_icon_warning = {0};

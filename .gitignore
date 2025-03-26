@@ -3,6 +3,9 @@ bin/
 build/
 debug/
 
+# Speculos related
+*_nvram.bin*
+
 # Unit tests and code coverage
 unit-tests/build/
 unit-tests/coverage/
