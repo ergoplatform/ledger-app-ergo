@@ -33,12 +33,31 @@ describe("Basic Tests", function () {
             }
         });
 
-        it("about flow is working", async function () {
+        it("settings flow is working, blind signing enabled", async function () {
             if (this.screens) {
                 this.timeout(10000);
                 const main = await this.screens.ensureMainMenu();
                 expect(main).to.be.equal(true);
                 await this.screens.click(1);
+                let settingsMenu = await this.screens.readFlow();
+                if(!settingsMenu[0].body.endsWith("Enabled")) {
+                    await this.screens.click(0);
+                    settingsMenu = await this.screens.readFlow();
+                }
+                await this.screens.click(1);
+                expect(settingsMenu).to.be.deep.equal(screen.SETTINGS_FLOW);
+            } else {
+                console.log("Check screens on the device, please!");
+                console.log("Screens", screen.SETTINGS_FLOW);
+            }
+        });
+
+        it("about flow is working", async function () {
+            if (this.screens) {
+                this.timeout(10000);
+                const main = await this.screens.ensureMainMenu();
+                expect(main).to.be.equal(true);
+                await this.screens.click(2);
                 const aboutMenu = await this.screens.readFlow();
                 await this.screens.click(2);
                 expect(aboutMenu).to.be.deep.equal(screen.ABOUT_FLOW);
