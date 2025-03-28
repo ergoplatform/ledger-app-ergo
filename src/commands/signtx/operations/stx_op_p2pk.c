@@ -32,7 +32,8 @@ static inline uint16_t handler_err(sign_transaction_operation_p2pk_ctx_t *ctx, u
 
 // Check if tx should use blind signing ui
 static inline bool is_blind_signing_tx(const sign_transaction_output_info_ctx_t *output) {
-    return STX_OUTPUT_INFO_TYPE(output) != SIGN_TRANSACTION_OUTPUT_INFO_TYPE_ADDRESS &&
+    return STX_OUTPUT_INFO_TYPE(output) != SIGN_TRANSACTION_OUTPUT_INFO_TYPE_BIP32 &&
+           STX_OUTPUT_INFO_TYPE(output) != SIGN_TRANSACTION_OUTPUT_INFO_TYPE_ADDRESS &&
            STX_OUTPUT_INFO_TYPE(output) != SIGN_TRANSACTION_OUTPUT_INFO_TYPE_MINERS_FEE;
 }
 
