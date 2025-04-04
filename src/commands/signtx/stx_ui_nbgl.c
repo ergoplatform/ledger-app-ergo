@@ -109,6 +109,9 @@ bool ui_stx_add_output_screens(sign_transaction_ui_output_confirm_ctx_t* ctx,
     return true;
 }
 
+/**
+ * Adds transaction confirmation screens to the UI.
+ */
 bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
                                     uint8_t* screen,
                                     uint8_t* output_screen,
@@ -118,6 +121,7 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
                                     ui_sign_transaction_operation_show_screen_cb screen_cb,
                                     ui_sign_transaction_operation_send_response_cb response_cb,
                                     void* cb_context) {
+    // check if there is enough space for the screens
     if (MAX_NUMBER_OF_SCREENS - *screen < 6) return false;
 
     memset(ctx, 0, sizeof(sign_transaction_ui_sign_confirm_ctx_t));
@@ -157,6 +161,7 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
 
     uint8_t tokens_count = stx_amounts_non_zero_tokens_count(amounts);
 
+    // setup the context
     ctx->op_screen_count = op_screen_count;
     ctx->op_screen_cb = screen_cb;
     ctx->op_response_cb = response_cb;
