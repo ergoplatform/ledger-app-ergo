@@ -28,6 +28,17 @@ typedef struct {
 extern app_ctx_t G_app_context;
 
 /**
+ * Global structure for NVM data storage.
+ */
+typedef struct internal_storage_t {
+    uint8_t blind_signing_enabled;
+    uint8_t initialized;
+} internal_storage_t;
+
+extern const internal_storage_t N_storage_real;
+#define N_storage (*(volatile internal_storage_t*) PIC(&N_storage_real))
+
+/**
  * Check is ui busy
  */
 static inline bool app_is_ui_busy() {

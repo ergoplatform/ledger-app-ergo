@@ -39,6 +39,14 @@ void app_main() {
     // Structured APDU command
     command_t cmd;
 
+    // Initialize the NVM data if required
+    if (N_storage.initialized != 0x01) {
+        internal_storage_t storage;
+        storage.blind_signing_enabled = 0x00;
+        storage.initialized = 0x01;
+        nvm_write((void *) &N_storage, &storage, sizeof(internal_storage_t));
+    }
+
     // Initialize I/O
     io_init();
 
