@@ -9,6 +9,11 @@ on:
       - '.github/workflows/*.yml'
       - 'tests/*'
 jobs:
+  # temporary disable this workflow as it seems to be failing 
+  # on LedgerHQ/app-ergo repo due to specific repo settings.
+  # See https://github.com/LedgerHQ/app-ergo/actions/runs/14265601766/job/39986602333
+  if: false 
+
   analyse:
     name: Analyse
     strategy: 
