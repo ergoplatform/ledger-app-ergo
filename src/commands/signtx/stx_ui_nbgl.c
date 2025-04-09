@@ -109,14 +109,19 @@ bool ui_stx_add_output_screens(sign_transaction_ui_output_confirm_ctx_t* ctx,
     return true;
 }
 
+/**
+ * Adds transaction confirmation screens to the UI.
+ */
 bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
                                     uint8_t* screen,
                                     uint8_t* output_screen,
                                     const sign_transaction_amounts_ctx_t* amounts,
+                                    uint8_t blind_signing_required,
                                     uint8_t op_screen_count,
                                     ui_sign_transaction_operation_show_screen_cb screen_cb,
                                     ui_sign_transaction_operation_send_response_cb response_cb,
                                     void* cb_context) {
+    // check if there is enough space for the screens
     if (MAX_NUMBER_OF_SCREENS - *screen < 6) return false;
 
     memset(ctx, 0, sizeof(sign_transaction_ui_sign_confirm_ctx_t));
@@ -124,8 +129,39 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
     sign_transaction_operation_p2pk_ctx_t* base_ctx =
         (sign_transaction_operation_p2pk_ctx_t*) cb_context;
 
+    // blind tx check
+    if (blind_signing_required) {
+        if (!N_storage.blind_signing_enabled) {
+            nbgl_useCaseChoice(&C_Warning_64px,
+                               "This transaction cannot be clear-signed",
+                               "Enable blind signing in the settings to sign this transaction.",
+                               "Go to settings",
+                               "Reject transaction",
+                               ui_stx_operation_approve_action);
+
+            bool approved = io_ui_process();
+
+            if (approved) {
+                app_set_current_command(CMD_NONE);
+                res_deny();
+
+                ui_menu_about();
+
+                return true;
+            } else {
+                app_set_current_command(CMD_NONE);
+                res_deny();
+
+                ui_menu_main();
+
+                return true;
+            }
+        }
+    }
+
     uint8_t tokens_count = stx_amounts_non_zero_tokens_count(amounts);
 
+    // setup the context
     ctx->op_screen_count = op_screen_count;
     ctx->op_screen_cb = screen_cb;
     ctx->op_response_cb = response_cb;
@@ -153,14 +189,24 @@ bool ui_stx_add_transaction_screens(sign_transaction_ui_sign_confirm_ctx_t* ctx,
     pair_list.pairs = pairs_global;
     pair_list.nbPairs = pair_index;
     pair_list.startIndex = 0;
-
-    nbgl_useCaseReview(TYPE_TRANSACTION,
-                       &pair_list,
-                       &C_app_logo_64px,
-                       "Review transaction",
-                       base_ctx->ui_approve.bip32_path,
-                       "Sign transaction",
-                       ui_stx_operation_approve_action);
+    if (blind_signing_required) {
+        nbgl_useCaseReviewBlindSigning(TYPE_TRANSACTION,
+                                       &pair_list,
+                                       &C_app_logo_64px,
+                                       "Review transaction",
+                                       base_ctx->ui_approve.bip32_path,
+                                       "Sign transaction",
+                                       NULL,
+                                       ui_stx_operation_approve_action);
+    } else {
+        nbgl_useCaseReview(TYPE_TRANSACTION,
+                           &pair_list,
+                           &C_app_logo_64px,
+                           "Review transaction",
+                           base_ctx->ui_approve.bip32_path,
+                           "Sign transaction",
+                           ui_stx_operation_approve_action);
+    }
     bool approved = io_ui_process();
 
     if (approved) {

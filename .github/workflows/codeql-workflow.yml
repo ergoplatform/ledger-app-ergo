@@ -1,13 +1,18 @@
 name: "CodeQL"
 on:
-  push:
-    branches: ["main", "master", "develop"]
-  pull_request:
-    branches: ["main", "master", "develop"]
-    # Excluded path: add the paths you want to ignore instead of deleting the workflow
-    paths-ignore:
-      - '.github/workflows/*.yml'
-      - 'tests/*'
+  # temporary disable this workflow as it seems to be failing 
+  # on LedgerHQ/app-ergo repo due to specific repo settings.
+  # See https://github.com/LedgerHQ/app-ergo/actions/runs/14265601766/job/39986602333
+  workflow_dispatch: 
+  
+  # push:
+  #   branches: ["main", "master", "develop"]
+  # pull_request:
+  #   branches: ["main", "master", "develop"]
+  #   # Excluded path: add the paths you want to ignore instead of deleting the workflow
+  #   paths-ignore:
+  #     - '.github/workflows/*.yml'
+  #     - 'tests/*'
 jobs:
   analyse:
     name: Analyse

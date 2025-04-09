@@ -35,6 +35,7 @@ typedef struct {
 
 typedef struct {
     sign_transaction_operation_p2pk_state_e state;
+    uint8_t blind_signing_required;
     uint8_t schnorr_key[PRIVATE_KEY_LEN];
     sign_transaction_bip32_path_t bip32;
     cx_blake2b_t tx_hash;

@@ -7,7 +7,7 @@ const { TxBuilder } = require('./helpers/transaction');
 
 const txId = "0000000000000000000000000000000000000000000000000000000000000000";
 
-function signTxFlows({ device }, auth, from, to, change, tokens_to = undefined, tokens_tx = undefined) {
+function signTxFlows({ device }, auth, from, to, change, is_blind, tokens_to = undefined, tokens_tx = undefined, script_hash = undefined) {
     let i = 0;
     const flows = [];
     // attest input screen
@@ -20,11 +20,21 @@ function signTxFlows({ device }, auth, from, to, change, tokens_to = undefined, 
     if (to || change) {
         flows[i] = [{ header: 'Review transaction', body: removeMasterNode(from.path.toString()) }];
     }
+    if (is_blind) {
+        flows[i].push({ header: 'Blind', body: 'signing' });
+    }
     // output screen
-    if (to) {
+    if (to && !script_hash) {
         flows[i].push(...[
                 { header: 'To', body: to.toBase58() },
                 { header: 'Amount', body: '0.100000000 ERG' }]);
+        if (tokens_to) { flows[i].push(...tokens_to); }
+    }
+    // script hash
+    if(script_hash) {
+        flows[i].push(...[
+            { header: 'Script Hash', body: script_hash },
+            { header: 'Amount', body: '0.100000000 ERG' }]);
         if (tokens_to) { flows[i].push(...tokens_to); }
     }
     // change screen
@@ -88,7 +98,32 @@ describe("Transaction Tests", function () {
                     .fee('1000000')
                     .change(change)
                     .build();
-                const expectedFlows = signTxFlows(test, auth, from, to, change);
+                const expectedFlows = signTxFlows(test, auth, from, to, change, false);
+                return { appTx, ergoTx, input: uInputs[0],
+                         expectedFlows, flowsCount: expectedFlows.length,
+                         network: TEST_DATA.network };
+            })
+            .shouldSucceed(({ergoTx, input, expectedFlows, flows}, signatures) => {
+                expect(flows).to.be.deep.equal(expectedFlows);
+                expect(signatures).to.have.length(1);
+                verifySignatures(ergoTx, signatures, input);
+            })
+            .run(({test, appTx, network}) => test.device.signTx(appTx, toNetwork(network)));
+
+        authTokenFlows("can blind sign tx")
+            .init(async ({test, auth}) => {
+                const from = TEST_DATA.address0;
+                const to = TEST_DATA.addressScript;
+                const to_hash = TEST_DATA.addressScriptHash;
+                const change = TEST_DATA.changeAddress;
+                const {appTx, ergoTx, uInputs} = new TxBuilder()
+                    .input(from, txId, 0, '1000000000')
+                    .dataInput(from.address, txId, 1)
+                    .output(to.address, '100000000')
+                    .fee('1000000')
+                    .change(change)
+                    .build();
+                const expectedFlows = signTxFlows(test, auth, from, to, change, true, null, null, to_hash);
                 return { appTx, ergoTx, input: uInputs[0],
                          expectedFlows, flowsCount: expectedFlows.length,
                          network: TEST_DATA.network };
@@ -112,7 +147,7 @@ describe("Transaction Tests", function () {
                     .fee('1000000')
                     .change(change)
                     .build();
-                const expectedFlows = signTxFlows(test, auth, from, to, change);
+                const expectedFlows = signTxFlows(test, auth, from, to, change, false);
                 return { appTx, ergoTx, input: uInputs[0],
                          expectedFlows, flowsCount: expectedFlows.length };
             })
@@ -147,7 +182,7 @@ describe("Transaction Tests", function () {
                     .fee('1000000')
                     .change(change)
                     .build();
-                const expectedFlows = signTxFlows(test, auth, from, to, change);
+                const expectedFlows = signTxFlows(test, auth, from, to, change, false);
                 return { appTx, ergoTx, input: uInputs[0],
                          expectedFlows, flowsCount: expectedFlows.length };
             })
@@ -169,7 +204,7 @@ describe("Transaction Tests", function () {
                     .fee('1000000')
                     .change(change)
                     .build();
-                const expectedFlows = signTxFlows(test, auth, from, to, change);
+                const expectedFlows = signTxFlows(test, auth, from, to, change, false);
                 return { appTx, ergoTx, input: uInputs[0],
                          expectedFlows, flowsCount: expectedFlows.length };
             })
@@ -204,7 +239,7 @@ describe("Transaction Tests", function () {
                     .dataInput(from.address, txId, 0)
                     .fee(null)
                     .buildAppTx();
-                const expectedFlows = signTxFlows(test, auth, from, null, null);
+                const expectedFlows = signTxFlows(test, auth, from, null, null, false);
                 return { tx, expectedFlows, flowsCount: expectedFlows.length };
             })
             .shouldFail(({flows, expectedFlows}, error) => {
@@ -233,7 +268,7 @@ describe("Transaction Tests", function () {
                     { header: 'Token [1]', body: ellipsize(test.model, tokenId) },
                     { header: 'Token [1] Raw Value', body: '1000' }
                 ];
-                const expectedFlows = signTxFlows(test, auth, from, to, change, tokensFlow);
+                const expectedFlows = signTxFlows(test, auth, from, to, change, false, tokensFlow);
                 return { appTx, ergoTx, input: uInputs[0],
                          expectedFlows, flowsCount: expectedFlows.length };
             })
@@ -263,7 +298,7 @@ describe("Transaction Tests", function () {
                     { header: 'Token [1]', body: ellipsize(test.model, tokenId) },
                     { header: 'Token [1] Raw Value', body: 'Burning: 1000' }
                 ];
-                const expectedFlows = signTxFlows(test, auth, from, to, change, null, tokensFlow);
+                const expectedFlows = signTxFlows(test, auth, from, to, change, false, null, tokensFlow);
                 return { appTx, ergoTx, input: uInputs[0],
                          expectedFlows, flowsCount: expectedFlows.length };;
             })
@@ -295,7 +330,7 @@ describe("Transaction Tests", function () {
                     { header: 'Token [1]', body: ellipsize(test.model, tokenId) },
                     { header: 'Token [1] Raw Value', body: 'Minting: 1000' }
                 ];
-                const expectedFlows = signTxFlows(test, auth, from, to, change, tokensOutFlow, tokensTxFlow);
+                const expectedFlows = signTxFlows(test, auth, from, to, change, false, tokensOutFlow, tokensTxFlow);
                 return { appTx, ergoTx, input: uInputs[0],
                          expectedFlows, flowsCount: expectedFlows.length };
             })
@@ -332,7 +367,7 @@ describe("Transaction Tests", function () {
                     { header: 'Token [2]', body: ellipsize(test.model, iTokenId) },
                     { header: 'Token [2] Raw Value', body: 'Burning: 1234' }
                 ];
-                const expectedFlows = signTxFlows(test, auth, from, to, change, tokensOutFlow, tokensTxFlow);
+                const expectedFlows = signTxFlows(test, auth, from, to, change, false, tokensOutFlow, tokensTxFlow);
                 return { appTx, ergoTx, input: uInputs[0],
                          expectedFlows, flowsCount: expectedFlows.length };
             })

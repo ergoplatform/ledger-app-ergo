@@ -14,5 +14,6 @@ extern const bagl_icon_details_t C_icon_app;
 extern const bagl_icon_details_t C_icon_dashboard_x;
 extern const bagl_icon_details_t C_icon_back;
 extern const bagl_icon_details_t C_icon_certificate;
+extern const bagl_icon_details_t C_icon_coggle;
 extern const bagl_icon_details_t C_app_logo_16px;
 extern const bagl_icon_details_t C_icon_warning;
