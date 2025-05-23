@@ -1,5 +1,8 @@
 #include "display.h"
 #include "../context.h"
+#ifdef REVAMPED_IO
+#include "os_io_legacy.h"
+#endif
 
 #ifdef HAVE_NBGL
 
@@ -14,12 +17,18 @@ void set_flow_response(bool response) {
 }
 
 void io_common_process() {
+#ifdef REVAMPED_IO
+    do {
+        io_seproxyhal_io_heartbeat();
+    } while (app_is_ui_busy());
+#else
     io_seproxyhal_general_status();
     do {
         io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
         io_seproxyhal_handle_event();
         io_seproxyhal_general_status();
     } while (io_seproxyhal_spi_is_status_sent() && app_is_ui_busy());
+#endif  // !REVAMPED_IO
 }
 
 bool io_ui_process() {
