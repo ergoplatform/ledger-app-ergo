@@ -1,12 +1,15 @@
 from ragger.conftest import configuration
 import random
+import os
 
 ###########################
 ### CONFIGURATION START ###
 ###########################
 
 
-with open("./seed.txt", "r") as file:
+__location__ = os.path.realpath(
+    os.path.join(os.getcwd(), os.path.dirname(__file__)))
+with open(os.path.join(__location__, "seed.txt"), "r") as file:
     MNEMONIC = file.read()
 
 configuration.OPTIONAL.CUSTOM_SEED = MNEMONIC
