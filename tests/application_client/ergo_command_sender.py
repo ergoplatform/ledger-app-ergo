@@ -12,14 +12,18 @@ MAX_APDU_LEN: int = 255
 CLA: int = 0xE0
 
 class P1(IntEnum):
-    P1_DA_RETURN = 0x01
-    P1_DA_DISPLAY = 0x02
+    P1_ZERO         = 0x00
+    P1_DA_RETURN    = 0x01
+    P1_DA_DISPLAY   = 0x02
 
 class P2(IntEnum):
+    P2_ZERO             = 0x00
     P2_DA_WITHOUT_TOKEN = 0x01
-    P2_DA_WITH_TOKEN = 0x02
+    P2_DA_WITH_TOKEN    = 0x02
 
 class InsType(IntEnum):
+    GET_VERSION = 0x01
+    GET_NAME    = 0x02
     DERIVE_ADDR = 0x11
 
 class Errors(IntEnum):
@@ -73,6 +77,22 @@ def split_message(message: bytes, max_size: int) -> List[bytes]:
 class ErgoCommandSender:
     def __init__(self, backend: BackendInterface) -> None:
         self.backend = backend
+
+
+    def get_version(self) -> RAPDU:
+        return self.backend.exchange(cla = CLA,
+                                     ins  = InsType.GET_VERSION,
+                                     p1   = P1.P1_ZERO,
+                                     p2   = P2.P2_ZERO,
+                                     data = b"")
+    
+
+    def get_name(self) -> RAPDU:
+        return self.backend.exchange(cla = CLA,
+                                     ins  = InsType.GET_NAME,
+                                     p1   = P1.P1_ZERO,
+                                     p2   = P2.P2_ZERO,
+                                     data = b"")
 
 
     @contextmanager
