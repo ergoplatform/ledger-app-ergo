@@ -1,5 +1,5 @@
 pytest
-ragger[speculos,ledgerwallet]>=1.11.4
+ragger[speculos,ledgerwallet]>=1.37.1
 ecdsa>=0.16.1,<0.17.0
 pycryptodome
 ergo-lib-python==0.28.0
