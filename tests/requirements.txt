@@ -1,0 +1,6 @@
+pytest
+ragger[speculos,ledgerwallet]>=1.11.4
+ecdsa>=0.16.1,<0.17.0
+pycryptodome
+ergo-lib-python==0.28.0
+base58==2.1.1

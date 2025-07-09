@@ -6,6 +6,9 @@ debug/
 # Speculos related
 *_nvram.bin*
 
+# Temporary
+tests_legacy
+
 # Unit tests and code coverage
 unit-tests/build/
 unit-tests/coverage/
