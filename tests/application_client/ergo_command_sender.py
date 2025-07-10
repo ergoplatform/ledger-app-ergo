@@ -3,11 +3,18 @@ from typing import Generator, List, Optional
 from contextlib import contextmanager
 
 from ragger.backend.interface import BackendInterface, RAPDU
+from ergo_lib_python.chain import Token, TokenId
+import math
 
 from helpers.ergo_writer import ErgoWriter
+from helpers.unsigned_box import UnsignedBox
+import helpers.core as core
+from helpers.attested_box import AttestedBox, AttestedBoxFrame
+from helpers.ergo_reader import ErgoReader
 
 
-MAX_APDU_LEN: int = 255
+MAX_APDU_LEN: int       = 255
+TOKEN_ENTRY_SIZE: int   = 40
 
 CLA: int = 0xE0
 
@@ -17,17 +24,24 @@ class P1(IntEnum):
     P1_DA_DISPLAY       = 0x02
     P1_PK_WITHOUT_TOKEN = 0x01
     P1_PK_WITH_TOKEN    = 0x02
+    # AT
+    P1_AT_BOX_START                 = 0x01,
+    P1_AT_ADD_ERGO_TREE_CHUNK       = 0x02,
+    P1_AT_ADD_TOKENS                = 0x03,
+    P1_AT_ADD_REGISTERS_CHUNK       = 0x04,
+    P1_AT_GET_ATTESTED_BOX_FRAME    = 0x05
 
 class P2(IntEnum):
     P2_ZERO             = 0x00
-    P2_DA_WITHOUT_TOKEN = 0x01
-    P2_DA_WITH_TOKEN    = 0x02
+    P2_WITHOUT_TOKEN = 0x01
+    P2_WITH_TOKEN    = 0x02
 
 class InsType(IntEnum):
     GET_VERSION = 0x01
     GET_NAME    = 0x02
     EXT_PUB_KEY = 0x10
     DERIVE_ADDR = 0x11
+    ATTEST_BOX  = 0x20
 
 class Errors(IntEnum):
     SW_DENY                       = 0x6985
@@ -106,7 +120,7 @@ class ErgoCommandSender:
         with self.backend.exchange_async(cla = CLA,
                                      ins  = InsType.DERIVE_ADDR,
                                      p1   = P1.P1_DA_RETURN if not show else P1.P1_DA_DISPLAY,
-                                     p2   = P2.P2_DA_WITHOUT_TOKEN if token == None else P2.P2_DA_WITH_TOKEN,
+                                     p2   = P2.P2_WITHOUT_TOKEN if token == None else P2.P2_WITH_TOKEN,
                                      data = data) as response:
             yield response
 
@@ -121,6 +135,99 @@ class ErgoCommandSender:
                                      p2   = P2.P2_ZERO,
                                      data = data) as response:
             yield response
+
+    
+    #
+    # ATTEST INPUT
+    #
+    @contextmanager
+    def attest_send_header(self, box: UnsignedBox, token: int | None = None):
+        writer = ErgoWriter(MAX_APDU_LEN)
+        data = writer.write_hex(box.tx_id).write_uint16(box.index).write_uint64(box.value).write_uint32(len(box.ergo_tree)).write_uint32(box.creation_height).write_byte(len(box.tokens)).write_uint32(len(box.additional_registers)).write_auth_token(token).get_buffer()
+        with self.backend.exchange_async(cla = CLA,
+                                     ins  = InsType.ATTEST_BOX,
+                                     p1   = P1.P1_AT_BOX_START,
+                                     p2   = P2.P2_WITHOUT_TOKEN if token == None else P2.P2_WITH_TOKEN,
+                                     data = data) as response:
+            yield response
+    
+    def attest_send_ergo_tree(self, ergo_tree: bytes, session_id: int) -> int:
+        res = self.backend.exchange(cla = CLA,
+                                     ins  = InsType.ATTEST_BOX,
+                                     p1   = P1.P1_AT_ADD_ERGO_TREE_CHUNK,
+                                     p2   = session_id,
+                                     data = ergo_tree)
+        return res.data[0] if len(res.data) > 0 else 0
+    
+    def attest_send_tokens(self, tokens: list[Token], session_id: int) -> int:
+        chunks:list[list[Token]] = core.chunk(tokens, math.floor(MAX_APDU_LEN / TOKEN_ENTRY_SIZE))
+        results:list[RAPDU] = []
+
+        for chunk in chunks:
+            data = ErgoWriter(len(chunk) * TOKEN_ENTRY_SIZE)
+            for token in chunk:
+                data.write_hex(token.token_id).write_uint64(token.amount)
+
+            results.append(self.backend.exchange(cla = CLA,
+                                     ins  = InsType.ATTEST_BOX,
+                                     p1   = P1.P1_AT_ADD_TOKENS,
+                                     p2   = session_id,
+                                     data = data.get_buffer()))
+            
+        return results[0].data[0] if len(results) > 0 else 0
+
+    def attest_send_registers(self, data: bytes, session_id: int) -> int:
+        res = self.backend.exchange(cla = CLA,
+                                     ins  = InsType.ATTEST_BOX,
+                                     p1   = P1.P1_AT_ADD_REGISTERS_CHUNK,
+                                     p2   = session_id,
+                                     data = data)
+        return res.data[0] if len(res.data) > 0 else 0
+    
+    def attest_decode_frame_response(self, data: bytes) -> AttestedBoxFrame:
+        reader = ErgoReader(data)
+        box_id = reader.read_hex(32)
+        count = reader.read_byte()
+        index = reader.read_byte()
+        amount = reader.read_uint64()
+        token_count = reader.read_byte()
+    
+
+        tokens: list[Token] = []
+        for i in range(token_count):
+            tokens.append(Token(TokenId(reader.read_slice(32)), reader.read_uint64()))
+
+        attestation = reader.read_hex(16)
+
+        return AttestedBoxFrame(box_id, count, index, amount, tokens, attestation, None, data)
+
+
+    def attest_get_attested_frames(self, count: int, session_id: int) -> list[AttestedBoxFrame]:
+        responses:list[AttestedBoxFrame] = []
+        for i in range(count):
+            responses.append(self.attest_decode_frame_response(self.backend.exchange(cla = CLA,
+                                     ins  = InsType.ATTEST_BOX,
+                                     p1   = P1.P1_AT_GET_ATTESTED_BOX_FRAME,
+                                     p2   = session_id,
+                                     data = i.to_bytes(1, byteorder="big")).data))
+            
+        return responses
+
+ 
+    def attest_input(self, box: UnsignedBox, token: int | None = None) -> Generator[AttestedBox | None, None, None]:
+        with self.attest_send_header(box, token):
+            yield None
+        
+        session_id = self.get_async_response().data[0]
+        frame_count = self.attest_send_ergo_tree(box.ergo_tree, session_id)
+
+        if len(box.tokens) > 0:
+            frame_count = self.attest_send_tokens(box.tokens, session_id)
+
+        if len(box.additional_registers) > 0:
+            frame_count = self.attest_send_registers(box.additional_registers, session_id)
+
+        yield AttestedBox(box, self.attest_get_attested_frames(frame_count, session_id))
 
     def get_async_response(self) -> Optional[RAPDU]:
         return self.backend.last_async_response

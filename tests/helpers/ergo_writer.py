@@ -29,6 +29,43 @@ class ErgoWriter:
 
         return self
     
+    def write_hex(self, val: str):
+        data = bytearray.fromhex(val)
+
+        size = len(data)
+        self.buffer[self.index:self.index + size] = data
+        self.index += size
+
+        return self
+    
+    def write_uint16(self, val: int):
+        data = val.to_bytes(2, byteorder="big")
+
+        size = len(data)
+        self.buffer[self.index:self.index + size] = data
+        self.index += size
+
+        return self
+    
+    def write_uint32(self, val: int):
+        data = val.to_bytes(4, byteorder="big")
+
+        size = len(data)
+        self.buffer[self.index:self.index + size] = data
+        self.index += size
+
+        return self
+    
+    def write_uint64(self, val: int):
+        data = val.to_bytes(8, byteorder="big")
+
+        size = len(data)
+        self.buffer[self.index:self.index + size] = data
+        self.index += size
+
+        return self
+
+    
     def get_position(self) -> int:
         return self.index
     
