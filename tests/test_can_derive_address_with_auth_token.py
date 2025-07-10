@@ -13,7 +13,6 @@ def test_can_derive_address_with_auth_token(backend: BackendInterface, scenario_
     with client.derive_address(address.network.__int__(), address.path.__str__(), auth_token):
         scenario_navigator.address_review_approve(custom_screen_text="Approve")
 
-    print("wait for response")
     response = client.get_async_response().data
     compare = base58.b58decode(address.address.to_str(address.network))
     

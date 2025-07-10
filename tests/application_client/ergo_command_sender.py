@@ -12,9 +12,11 @@ MAX_APDU_LEN: int = 255
 CLA: int = 0xE0
 
 class P1(IntEnum):
-    P1_ZERO         = 0x00
-    P1_DA_RETURN    = 0x01
-    P1_DA_DISPLAY   = 0x02
+    P1_ZERO             = 0x00
+    P1_DA_RETURN        = 0x01
+    P1_DA_DISPLAY       = 0x02
+    P1_PK_WITHOUT_TOKEN = 0x01
+    P1_PK_WITH_TOKEN    = 0x02
 
 class P2(IntEnum):
     P2_ZERO             = 0x00
@@ -24,6 +26,7 @@ class P2(IntEnum):
 class InsType(IntEnum):
     GET_VERSION = 0x01
     GET_NAME    = 0x02
+    EXT_PUB_KEY = 0x10
     DERIVE_ADDR = 0x11
 
 class Errors(IntEnum):
@@ -104,6 +107,18 @@ class ErgoCommandSender:
                                      ins  = InsType.DERIVE_ADDR,
                                      p1   = P1.P1_DA_RETURN if not show else P1.P1_DA_DISPLAY,
                                      p2   = P2.P2_DA_WITHOUT_TOKEN if token == None else P2.P2_DA_WITH_TOKEN,
+                                     data = data) as response:
+            yield response
+
+    @contextmanager
+    def ext_pub_key(self, path: str, token: int | None = None) -> Generator[None, None, None]:
+        writer = ErgoWriter(MAX_APDU_LEN)
+        data = writer.write_path(path).write_auth_token(token).get_buffer()
+
+        with self.backend.exchange_async(cla = CLA,
+                                     ins  = InsType.EXT_PUB_KEY,
+                                     p1   = P1.P1_PK_WITHOUT_TOKEN if token == None else P1.P1_PK_WITH_TOKEN,
+                                     p2   = P2.P2_ZERO,
                                      data = data) as response:
             yield response
 
