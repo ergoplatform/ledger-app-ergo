@@ -105,6 +105,7 @@ file(GLOB SHIMS_SRC ${ERGO_PATH}/unit-tests/utils/*.c)
 
 include_directories(
     ${BOLOS_SDK}/include
+    ${BOLOS_SDK}/io/include
     ${BOLOS_SDK}/target/nanox/include
     ${BOLOS_SDK}/lib_cxng/include
     ${BOLOS_SDK}/lib_bagl/include
