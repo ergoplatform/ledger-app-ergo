@@ -1,6 +1,19 @@
 name: Compilation & tests
 
-on: [push, pull_request]
+
+on:
+  workflow_dispatch:
+    inputs:
+      golden_run:
+        type: choice
+        required: true
+        default: 'Raise an error (default)'
+        description: CI behavior if the test snapshots are different than expected.
+        options:
+          - 'Raise an error (default)'
+          - 'Open a PR'
+  push:
+  pull_request:
 
 jobs:
   job_build_application:
@@ -103,52 +116,10 @@ jobs:
           name: scan-build
           path: scan-build
 
-  job_test:
-    name: Functional Tests
-
-    strategy:
-      matrix:
-        include:
-          - model:
-              id: nanox
-              dir: nanox
-          - model:
-              id: nanosp
-              dir: nanos2
-
-    needs: job_build_application
-    runs-on: ubuntu-latest
-
-    container:
-      image: ghcr.io/ledgerhq/speculos:latest
-      ports:
-        - 5000:5000
-        - 9999:9999
-      options: --entrypoint /bin/bash
-
-    steps:
-      - name: Clone
-        uses: actions/checkout@v4
-
-      - name: Download app binary
-        uses: actions/download-artifact@v4
-        with:
-          name: compiled_app_binaries
-          path: bin
-
-      - name: Run test
-        run: |
-          apt-get update && apt-get install -qy curl netcat-traditional
-          curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-          apt-get install -qy nodejs
-          export SEED=`cat tests/seed.txt`
-          nohup bash -c "python /speculos/speculos.py bin/${{ matrix.model.dir }}/bin/app.elf --apdu-port 9999 --api-port 5000 --display headless --model=${{ matrix.model.id }} --seed \"${SEED}\"" > speculos.log 2<&1 &
-          cd tests && npm install
-          until `nc -w5 -z -v 127.0.0.1 9999`; do sleep 1; done;
-          npm --model=${{matrix.model.id}} --port=5000 run test
-
-      - name: Upload Speculos log
-        uses: actions/upload-artifact@v4
-        with:
-          name: speculos-${{matrix.model.id}}-log
-          path: speculos.log
+  ragger_tests:
+    name: Run ragger tests using the reusable workflow
+    needs: build_application
+    uses: LedgerHQ/ledger-app-workflows/.github/workflows/reusable_ragger_tests.yml@v1
+    with:
+      download_app_binaries_artifact: "compiled_app_binaries"
+      regenerate_snapshots: ${{ inputs.golden_run == 'Open a PR' }}
