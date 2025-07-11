@@ -3,13 +3,12 @@ from ragger.backend.interface import BackendInterface
 from ragger.navigator.navigation_scenario import NavigateWithScenario, NavigationScenarioData, Navigator, Device, UseCase
 
 from application_client.ergo_command_sender import ErgoCommandSender
-from helpers.data import ADDRESS_0
+from helpers.data import ADDRESS_0, TX_ID
 from helpers.tx_builder import TxBuilder
 from helpers.unsigned_box import UnsignedBox
 
 def test_attest_input(device: Device, backend: BackendInterface, scenario_navigator: NavigateWithScenario, navigator: Navigator) -> None:
-    tx_id = "0000000000000000000000000000000000000000000000000000000000000000"
-    unsigned_box: UnsignedBox = TxBuilder().input(ADDRESS_0, tx_id, 0, 1000000000).inputs[0].box
+    unsigned_box: UnsignedBox = TxBuilder().input(ADDRESS_0, TX_ID, 0, 1000000000).inputs[0].box
 
     client = ErgoCommandSender(backend)
     

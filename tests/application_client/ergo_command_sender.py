@@ -298,7 +298,7 @@ class ErgoCommandSender:
                                      data = data)
             
     def stx_send_box_context_extension(self, session_id: int, extension: bytes):
-        self.backend.exchange(cla = CLA,
+        self.send_data(cla = CLA,
                                      ins  = InsType.SIGN_TX,
                                      p1   = P1.P1_STX_ADD_INPUT_BOX_CONTEXT_EXTENSION_CHUNK,
                                      p2   = session_id,
@@ -350,7 +350,7 @@ class ErgoCommandSender:
                                      data = data)
         
     def stx_add_output_box_ergo_tree(self, session_id: int, ergo_tree: bytes):
-        self.backend.exchange(cla = CLA,
+        self.send_data(cla = CLA,
                                      ins  = InsType.SIGN_TX,
                                      p1   = P1.P1_STX_ADD_OUTPUT_BOX_ERGO_TREE_CHUNK,
                                      p2   = session_id,
@@ -373,7 +373,7 @@ class ErgoCommandSender:
                                      data = data)
     
     def stx_add_output_box_registers(self, session_id: int, registers: bytes):
-        self.backend.exchange(cla = CLA,
+        self.send_data(cla = CLA,
                                      ins  = InsType.SIGN_TX,
                                      p1   = P1.P1_STX_ADD_OUTPUT_BOX_REGISTERS_CHUNK,
                                      p2   = session_id,
@@ -479,6 +479,17 @@ class ErgoCommandSender:
             sign_bytes.append(signatures[input.sign_path])
 
         return sign_bytes
+    
+    def send_data(self, cla: int, ins: int, p1: int, p2: int, data: bytes) -> list[RAPDU | None]:
+        responses: list[RAPDU | None] = []
+        for i in range(math.ceil(len(data) / MAX_APDU_LEN)):
+            chunk = data[i * MAX_APDU_LEN : min((i + 1) * MAX_APDU_LEN, len(data))]
+            responses.append(self.backend.exchange(cla = cla,
+                                     ins  = ins,
+                                     p1   = p1,
+                                     p2   = p2,
+                                     data = chunk))
+        return responses
 
     def get_async_response(self) -> Optional[RAPDU]:
         return self.backend.last_async_response
