@@ -26,7 +26,7 @@ def to_unsigned_box(ergo_box: ErgoBox, context_extension: ContextExtension, sign
     return UnsignedBox(ergo_box, context_extension, sign_path)
 
 def is_tokens_equal(t1: Token, t2: Token) -> bool:
-    return t1.token_id.__str__() == t2.token_id.__str__() and t1.amount == t2.amount
+    return t1.token_id.__bytes__().hex() == t2.token_id.__bytes__().hex() and t1.amount == t2.amount
 
 def to_data_input(data_input: DataInput):
     return data_input.box_id.__str__()
@@ -85,8 +85,15 @@ class ErgoTxBuilder:
         self.change_address: Address | None = None
         self.change_map: ErgoChangeMap | None = None
 
-    def input(self, extended_address: ExtendedAddress, tx_id: str, index: int, amount: int, tokens: list[Token] | None = None):
-        ergo_box = create_ergo_box(extended_address.address.to_str(extended_address.network), tx_id, index, amount, tokens)
+    def input(self, extended_address: ExtendedAddress, tx_id: str, index: int, amount: int, tokens: list[ErgoToken] | None = None):
+        stokens: list[Token] | None = None
+        if tokens != None:
+            stokens = []
+            for stoken in tokens:
+                id = TokenId(stoken.id)
+                stokens.append(Token(id, stoken.amount))
+
+        ergo_box = create_ergo_box(extended_address.address.to_str(extended_address.network), tx_id, index, amount, stokens)
         return self.box_input(ergo_box, extended_address.path)
     
     def box_input(self, ergo_box: ErgoBox, path: DerivationPath):

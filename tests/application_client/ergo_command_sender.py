@@ -191,15 +191,16 @@ class ErgoCommandSender:
         for chunk in chunks:
             data = ErgoWriter(len(chunk) * TOKEN_ENTRY_SIZE)
             for token in chunk:
-                data.write_hex(token.token_id).write_uint64(token.amount)
+                data.write_bytes(token.token_id.__bytes__()).write_uint64(token.amount)
 
             results.append(self.backend.exchange(cla = CLA,
                                      ins  = InsType.ATTEST_BOX,
                                      p1   = P1.P1_AT_ADD_TOKENS,
                                      p2   = session_id,
                                      data = data.get_buffer()))
-            
-        return results[0].data[0] if len(results) > 0 else 0
+        
+        latest = results.pop() if len(results) > 0 else None
+        return latest.data[0] if latest != None and len(latest.data) > 0 else 0
 
     def attest_send_registers(self, data: bytes, session_id: int) -> int:
         res = self.backend.exchange(cla = CLA,
@@ -362,7 +363,7 @@ class ErgoCommandSender:
         for chunk in chunks:
             writer = ErgoWriter(len(chunk) * ADD_OUTPUT_TOKEN_SIZE)
             for token in chunk:
-                writer.write_uint32(distinct_token_ids.index(token.token_id.__str__()))
+                writer.write_uint32(distinct_token_ids.index(token.token_id.__bytes__().hex()))
                 writer.write_uint64(token.amount)
 
             data = writer.get_buffer()
