@@ -123,10 +123,16 @@ class ErgoTxBuilder:
         else:
             self.minting_outputs.append(None)
         
+        if mint_token != None:
+            if stokens == None:
+                stokens = []
+            stokens.append(mint_token)
+
         output = ErgoBoxCandidate(
             value=value, script=address.address, creation_height=0,
-            tokens=stokens, mint_token=mint_token
+            tokens=stokens#, mint_token=mint_token
         )
+
         self.amount = self.amount + output.value #.checked_add(output.value().as_i64())
         self.outputs.append(output)
         return self
