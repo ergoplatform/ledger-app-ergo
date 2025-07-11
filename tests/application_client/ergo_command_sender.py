@@ -11,6 +11,7 @@ from helpers.unsigned_box import UnsignedBox
 import helpers.core as core
 from helpers.attested_box import AttestedBox, AttestedBoxFrame
 from helpers.ergo_reader import ErgoReader
+from helpers.tx_builder import AttestedTransaction
 
 
 MAX_APDU_LEN: int       = 255
@@ -30,6 +31,20 @@ class P1(IntEnum):
     P1_AT_ADD_TOKENS                = 0x03,
     P1_AT_ADD_REGISTERS_CHUNK       = 0x04,
     P1_AT_GET_ATTESTED_BOX_FRAME    = 0x05
+    # STX
+    P1_STX_START_SIGNING                            = 0x01,
+    P1_STX_START_TRANSACTION                        = 0x10,
+    P1_STX_ADD_TOKEN_IDS                            = 0x11,
+    P1_STX_ADD_INPUT_BOX_FRAME                      = 0x12,
+    P1_STX_ADD_INPUT_BOX_CONTEXT_EXTENSION_CHUNK    = 0x13,
+    P1_STX_ADD_DATA_INPUTS                          = 0x14,
+    P1_STX_ADD_OUTPUT_BOX_START                     = 0x15,
+    P1_STX_ADD_OUTPUT_BOX_ERGO_TREE_CHUNK           = 0x16,
+    P1_STX_ADD_OUTPUT_BOX_MINERS_FEE_TREE           = 0x17,
+    P1_STX_ADD_OUTPUT_BOX_CHANGE_TREE               = 0x18,
+    P1_STX_ADD_OUTPUT_BOX_TOKENS                    = 0x19,
+    P1_STX_ADD_OUTPUT_BOX_REGISTERS_CHUNK           = 0x1a,
+    P1_STX_CONFIRM_AND_SIGN                         = 0x20
 
 class P2(IntEnum):
     P2_ZERO             = 0x00
@@ -228,6 +243,13 @@ class ErgoCommandSender:
             frame_count = self.attest_send_registers(box.additional_registers, session_id)
 
         yield AttestedBox(box, self.attest_get_attested_frames(frame_count, session_id))
+
+    #
+    # SIGN TRANSACTION
+    #
+    
+    def sign_tx(self, tx: AttestedTransaction, sign_path: str, network: int, token: int | None = None) -> Generator[AttestedBox | None, None, None]:
+        pass
 
     def get_async_response(self) -> Optional[RAPDU]:
         return self.backend.last_async_response
