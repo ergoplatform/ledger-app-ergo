@@ -16,7 +16,7 @@ def test_can_sign_tx_with_tokens_with_auth(device: Device, backend: BackendInter
 
     builder = TxBuilder()
     builder.input(FROM, TX_ID, 0, 1000000000, TOKENS)
-    builder.data_input(FROM, TX_ID, 1)
+    builder.data_input(FROM, TX_ID, 0)
     builder.output(TO, 100000000, TOKENS)
     builder.fee(1000000)
     builder.change(CHANGE)
