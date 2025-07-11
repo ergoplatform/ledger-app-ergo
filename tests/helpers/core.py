@@ -9,3 +9,9 @@ def chunk(array: list, size: int) -> list:
         chunks.append(array[i:i + size])
 
     return chunks
+
+
+def uniq(array: list) -> list:
+    if not array:
+        return array
+    return list(dict.fromkeys(array))

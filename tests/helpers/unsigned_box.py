@@ -9,5 +9,5 @@ class UnsignedBox:
         self.creation_height = ergo_box.creation_height
         self.tokens = ergo_box.tokens
         self.additional_registers = ergo_box.additional_registers.__bytes__()
-        self.extension = context_extension.__bytes__()
+        self.extension = context_extension.__bytes__() # b"" if context_extension.__len__() == 0 else context_extension.__bytes__()
         self.sign_path = sign_path

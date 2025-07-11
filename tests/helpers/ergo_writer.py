@@ -64,6 +64,13 @@ class ErgoWriter:
         self.index += size
 
         return self
+    
+    def write_bytes(self, val: bytes):
+        size = len(val)
+        self.buffer[self.index:self.index + size] = val
+        self.index += size
+
+        return self
 
     
     def get_position(self) -> int:

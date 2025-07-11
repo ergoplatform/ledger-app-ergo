@@ -1,8 +1,9 @@
 from ergo_lib_python.transaction import TxBuilder as TxBuilderErgo, TxId, DataInput, UnsignedTransaction
 from ergo_lib_python.chain import ErgoBox, ContextExtension, ErgoBoxCandidate, Address, Token, TokenId
 from ergo_lib_python.wallet import DerivationPath, select_boxes_simple
-from typing import Iterable, Set
+from typing import Iterable
 
+from helpers.attested_box import AttestedBox
 from helpers.data import NETWORK
 from helpers.unsigned_box import UnsignedBox
 from helpers.extended_address import ExtendedAddress
@@ -54,6 +55,14 @@ class AppTx:
         self.change_map = change_map
 
 class AttestedTransaction:
+    def __init__(self, inputs: list[AttestedBox], data_inputs: list[str], outputs: list[ErgoBoxCandidate], distinct_token_ids: list[TokenId], change_map: ErgoChangeMap | None):
+        self.inputs = inputs
+        self.data_inputs = data_inputs    
+        self.outputs = outputs
+        self.distinct_token_ids = distinct_token_ids
+        self.change_map = change_map
+
+class UnattestedTransaction:
     def __init__(self, app_tx: AppTx, ergo_tx: UnsignedTransaction, u_inputs: list[ErgoBox]):
         self.app_tx = app_tx
         self.ergo_tx = ergo_tx
@@ -183,7 +192,7 @@ class ErgoTxBuilder:
         )
         tx_inputs[0].ergo
 
-        return AttestedTransaction(app_tx, ergo_tx, [i.ergo for  i in tx_inputs])
+        return UnattestedTransaction(app_tx, ergo_tx, [i.ergo for  i in tx_inputs])
 
 
 class TxBuilder(ErgoTxBuilder):

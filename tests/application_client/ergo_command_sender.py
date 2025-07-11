@@ -1,9 +1,9 @@
-from enum import IntEnum
+from enum import Enum, IntEnum
 from typing import Generator, List, Optional
 from contextlib import contextmanager
 
 from ragger.backend.interface import BackendInterface, RAPDU
-from ergo_lib_python.chain import Token, TokenId
+from ergo_lib_python.chain import Token, TokenId, ErgoBoxCandidate, Address
 import math
 
 from helpers.ergo_writer import ErgoWriter
@@ -11,11 +11,17 @@ from helpers.unsigned_box import UnsignedBox
 import helpers.core as core
 from helpers.attested_box import AttestedBox, AttestedBoxFrame
 from helpers.ergo_reader import ErgoReader
-from helpers.tx_builder import AttestedTransaction
+from helpers.tx_builder import AppTx, AttestedTransaction, ErgoChangeMap
+from helpers.data import MINER_FEE_TREE
 
 
 MAX_APDU_LEN: int       = 255
 TOKEN_ENTRY_SIZE: int   = 40
+HASH_SIZE: int          = 32
+
+ADD_OUTPUT_HEADER_SIZE      = 21 # https://github.com/ergoplatform/ledger-app-ergo/blob/main/doc/INS-21-SIGN-TRANSACTION.md#data-5
+ADD_OUTPUT_CHANGE_PATH_SIZE = 51 # https://github.com/ergoplatform/ledger-app-ergo/blob/main/doc/INS-21-SIGN-TRANSACTION.md#data-6
+ADD_OUTPUT_TOKEN_SIZE       = 12 # https://github.com/ergoplatform/ledger-app-ergo/blob/main/doc/INS-21-SIGN-TRANSACTION.md#0x19---add-output-box-tokens
 
 CLA: int = 0xE0
 
@@ -57,6 +63,7 @@ class InsType(IntEnum):
     EXT_PUB_KEY = 0x10
     DERIVE_ADDR = 0x11
     ATTEST_BOX  = 0x20
+    SIGN_TX     = 0x21
 
 class Errors(IntEnum):
     SW_DENY                       = 0x6985
@@ -101,6 +108,9 @@ class Errors(IntEnum):
     SW_BIP32_FORMATTING_FAILED    = 0xE101
     SW_ADDRESS_FORMATTING_FAILED  = 0xE102
 
+class StxState(Enum):
+    ATTEST                  = 1
+    WAITING_CONFIRMATION    = 2
 
 def split_message(message: bytes, max_size: int) -> List[bytes]:
     return [message[x:x + max_size] for x in range(0, len(message), max_size)]
@@ -247,9 +257,228 @@ class ErgoCommandSender:
     #
     # SIGN TRANSACTION
     #
+    def stx_send_header(self, network: int, path: str, token: int | None = None):
+        writer = ErgoWriter(MAX_APDU_LEN)
+        data = writer.write_byte(network).write_path(path).write_auth_token(token).get_buffer()
+        return self.backend.exchange(cla = CLA,
+                                     ins  = InsType.SIGN_TX,
+                                     p1   = P1.P1_STX_START_SIGNING,
+                                     p2   = P2.P2_WITHOUT_TOKEN if token == None else P2.P2_WITH_TOKEN,
+                                     data = data)
+
+    def stx_send_start_tx(self, session_id: int, tx:AttestedTransaction, unique_token_ids_count:int):
+        writer = ErgoWriter(MAX_APDU_LEN)
+        writer.write_uint16(len(tx.inputs))
+        writer.write_uint16(len(tx.data_inputs))
+        writer.write_byte(unique_token_ids_count)
+        writer.write_uint16(len(tx.outputs))
+        data = writer.get_buffer()
+
+        self.backend.exchange(cla = CLA,
+                                     ins  = InsType.SIGN_TX,
+                                     p1   = P1.P1_STX_START_TRANSACTION,
+                                     p2   = session_id,
+                                     data = data)
+        
+    def stx_send_distinct_tokens_ids(self, session_id: int, token_ids: list[TokenId]):
+        tkns = [i.__bytes__() for i in token_ids]
+
+        chunks:list[list[bytes]] = core.chunk(tkns, math.floor(MAX_APDU_LEN / HASH_SIZE))
+
+        for chunk in chunks:
+            writer = ErgoWriter(len(chunk) * HASH_SIZE)
+            for id in chunk:
+                writer.write_bytes(id)
+
+            data = writer.get_buffer()
+            self.backend.exchange(cla = CLA,
+                                     ins  = InsType.SIGN_TX,
+                                     p1   = P1.P1_STX_ADD_TOKEN_IDS,
+                                     p2   = session_id,
+                                     data = data)
+            
+    def stx_send_box_context_extension(self, session_id: int, extension: bytes):
+        self.backend.exchange(cla = CLA,
+                                     ins  = InsType.SIGN_TX,
+                                     p1   = P1.P1_STX_ADD_INPUT_BOX_CONTEXT_EXTENSION_CHUNK,
+                                     p2   = session_id,
+                                     data = extension)
+            
+    def stx_send_inputs(self, session_id: int, inputs: list[AttestedBox]):
+        for input in inputs:
+            for frame in input.frames:
+                self.backend.exchange(cla = CLA,
+                                     ins  = InsType.SIGN_TX,
+                                     p1   = P1.P1_STX_ADD_INPUT_BOX_FRAME,
+                                     p2   = session_id,
+                                     data = frame.buffer)
+
+            if len(input.box.extension) > 0 and not (len(input.box.extension) == 1 and input.box.extension[0] == 0x00):
+                self.stx_send_box_context_extension(session_id, input.box.extension)  
+
+    def stx_send_data_inputs(self, session_id: int, box_ids: list[str]):
+        chunks:list[list[str]] = core.chunk(box_ids, math.floor(MAX_APDU_LEN / HASH_SIZE))
+
+        for chunk in chunks:
+            writer = ErgoWriter(len(chunk) * HASH_SIZE)
+            for id in chunk:
+                writer.write_hex(id)
+
+            data = writer.get_buffer()
+            self.backend.exchange(cla = CLA,
+                                     ins  = InsType.SIGN_TX,
+                                     p1   = P1.P1_STX_ADD_DATA_INPUTS,
+                                     p2   = session_id,
+                                     data = data)
+
+    def stx_add_output_box_miners_fee_tree(self, session_id: int):
+        self.backend.exchange(cla = CLA,
+                                     ins  = InsType.SIGN_TX,
+                                     p1   = P1.P1_STX_ADD_OUTPUT_BOX_MINERS_FEE_TREE,
+                                     p2   = session_id,
+                                     data = b"")
+        
+    def stx_add_output_box_change_path(self, session_id: int, path: str):        
+        writer = ErgoWriter(ADD_OUTPUT_CHANGE_PATH_SIZE)
+        writer.write_path(path)
+        data = writer.get_buffer()
+
+        self.backend.exchange(cla = CLA,
+                                     ins  = InsType.SIGN_TX,
+                                     p1   = P1.P1_STX_ADD_OUTPUT_BOX_CHANGE_TREE,
+                                     p2   = session_id,
+                                     data = data)
+        
+    def stx_add_output_box_ergo_tree(self, session_id: int, ergo_tree: bytes):
+        self.backend.exchange(cla = CLA,
+                                     ins  = InsType.SIGN_TX,
+                                     p1   = P1.P1_STX_ADD_OUTPUT_BOX_ERGO_TREE_CHUNK,
+                                     p2   = session_id,
+                                     data = ergo_tree)
+        
+    def stx_add_output_box_tokens(self, session_id: int, tokens: list[Token], distinct_token_ids: list[str]):
+        chunks:list[list[Token]] = core.chunk(tokens, math.floor(MAX_APDU_LEN / ADD_OUTPUT_TOKEN_SIZE))
+
+        for chunk in chunks:
+            writer = ErgoWriter(len(chunk) * ADD_OUTPUT_TOKEN_SIZE)
+            for token in chunk:
+                writer.write_uint32(distinct_token_ids.index(token.token_id.__str__()))
+                writer.write_uint64(token.amount)
+
+            data = writer.get_buffer()
+            self.backend.exchange(cla = CLA,
+                                     ins  = InsType.SIGN_TX,
+                                     p1   = P1.P1_STX_ADD_OUTPUT_BOX_TOKENS,
+                                     p2   = session_id,
+                                     data = data)
     
-    def sign_tx(self, tx: AttestedTransaction, sign_path: str, network: int, token: int | None = None) -> Generator[AttestedBox | None, None, None]:
-        pass
+    def stx_add_output_box_registers(self, session_id: int, registers: bytes):
+        self.backend.exchange(cla = CLA,
+                                     ins  = InsType.SIGN_TX,
+                                     p1   = P1.P1_STX_ADD_OUTPUT_BOX_REGISTERS_CHUNK,
+                                     p2   = session_id,
+                                     data = registers)
+
+
+    def stx_send_outputs(self, session_id: int, boxes: list[ErgoBoxCandidate], change_map: ErgoChangeMap, distinct_token_ids: list[TokenId]):
+        distinct_token_ids_str = [i.__bytes__().hex() for i in distinct_token_ids]
+        for box in boxes:
+            writer = ErgoWriter(ADD_OUTPUT_HEADER_SIZE)
+            writer.write_uint64(box.value)
+            writer.write_uint32(len(box.ergo_tree.__bytes__()))
+            writer.write_uint32(box.creation_height)
+            writer.write_byte(len(box.tokens))
+            writer.write_uint32(len(box.additional_registers))
+
+            data = writer.get_buffer()
+            self.backend.exchange(cla = CLA,
+                                     ins  = InsType.SIGN_TX,
+                                     p1   = P1.P1_STX_ADD_OUTPUT_BOX_START,
+                                     p2   = session_id,
+                                     data = data)
+
+            tree: str = box.ergo_tree.__bytes__().hex()
+            tree_addr = None
+            try:
+                tree_addr = Address(box.ergo_tree.__bytes__()).to_str()
+            except:
+                pass
+            
+            if tree == MINER_FEE_TREE:
+                self.stx_add_output_box_miners_fee_tree(session_id)
+            
+            elif tree_addr is not None and tree_addr == change_map.address:
+                self.stx_add_output_box_change_path(session_id, change_map.path)            
+            else:
+                self.stx_add_output_box_ergo_tree(session_id, box.ergo_tree.__bytes__())            
+
+            
+            if box.tokens and len(box.tokens) > 0:
+                self.stx_add_output_box_tokens(session_id, box.tokens, distinct_token_ids_str)
+            
+            if len(box.additional_registers) > 0:
+                self.stx_add_output_box_registers(session_id, box.additional_registers.__bytes__())
+
+    @contextmanager
+    def stx_send_confirm_and_sign(self, session_id: int):
+        with self.backend.exchange_async(cla = CLA,
+                                     ins  = InsType.SIGN_TX,
+                                     p1   = P1.P1_STX_CONFIRM_AND_SIGN,
+                                     p2   = session_id,
+                                     data = b"") as response:
+            yield response
+    
+    def sign_tx(self, tx: AttestedTransaction, sign_path: str, network: int, token: int | None = None) -> Generator[bytes | None, None, None]:
+        session_id = self.stx_send_header(network, sign_path, token).data[0]
+        self.stx_send_start_tx(session_id, tx, len(tx.distinct_token_ids))
+        self.stx_send_distinct_tokens_ids(session_id, tx.distinct_token_ids)
+        self.stx_send_inputs(session_id, tx.inputs)
+        self.stx_send_data_inputs(session_id, tx.data_inputs)
+        self.stx_send_outputs(session_id, tx.outputs, tx.change_map, tx.distinct_token_ids)
+
+        with self.stx_send_confirm_and_sign(session_id):
+            yield None
+        
+        res = self.get_async_response().data
+        yield res
+
+
+    def sign_tx_flow(self, tx: AppTx, network: int, token: int | None = None) -> Generator[StxState, None, None]:
+        if len(tx.inputs) == 0:
+            raise ValueError("inputs is empty")        
+
+        attested_inputs:list[AttestedBox] = []
+
+        for input in tx.inputs:
+            for nb in self.attest_input(input, None):
+                if nb != None:
+                    nb.set_extension(input.extension)
+                    attested_inputs.append(nb)
+                    break
+
+                yield StxState.ATTEST
+
+        sign_paths:list[str] = core.uniq([i.sign_path for i in tx.inputs])
+        attested_tx = AttestedTransaction(attested_inputs, tx.data_inputs, tx.outputs, tx.distinct_token_ids, tx.change_map)
+
+        signatures = {}
+        for path in sign_paths:
+            for nb in self.sign_tx(
+                attested_tx,
+                path,
+                network,
+                token
+            ):
+                if(nb != None):
+                    signatures[path] = nb
+                else:
+                    yield StxState.WAITING_CONFIRMATION
+
+        sign_bytes: list[bytes] = []
+        for input in tx.inputs:
+            sign_bytes.append(signatures[input.sign_path])
+
+        return sign_bytes
 
     def get_async_response(self) -> Optional[RAPDU]:
         return self.backend.last_async_response
