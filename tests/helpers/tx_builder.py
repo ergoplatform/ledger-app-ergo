@@ -7,6 +7,7 @@ from helpers.attested_box import AttestedBox
 from helpers.data import NETWORK
 from helpers.unsigned_box import UnsignedBox
 from helpers.extended_address import ExtendedAddress
+from helpers.miner_address import get_miner_address
 
 def distinct_token_ids(output_candidates: Iterable[ErgoBoxCandidate]) -> list[TokenId]:
     token_ids = [
@@ -190,11 +191,49 @@ class ErgoTxBuilder:
             distinct_token_ids(ergo_tx.output_candidates),
             self.change_map
         )
-        tx_inputs[0].ergo
 
         return UnattestedTransaction(app_tx, ergo_tx, [i.ergo for  i in tx_inputs])
 
 
 class TxBuilder(ErgoTxBuilder):
-    def __init__(self):
+    def __init__(self, network = NETWORK):
+        self.network = network
         super().__init__()
+
+    def build_app_tx(self):
+        #[to_data_input(i) for i in ergo_tx.data_inputs]
+        inputs = [i.box for i in self.inputs]
+        outputs = self.outputs
+
+        if self.fee_amount is not None:
+            outputs.append(ErgoBoxCandidate(
+                value=self.fee_amount, script=get_miner_address(self.network), creation_height=0
+            ))
+
+        if self.change_address is not None:
+            sum_inputs = 0
+            for data in inputs:
+                sum_inputs += data.value
+
+            sum_outputs = 0
+            for data in outputs:
+                sum_outputs += data.value
+
+            amount = sum_inputs - sum_outputs
+
+            outputs.append(ErgoBoxCandidate(
+                value=amount, script=self.change_address, creation_height=0
+            ))
+
+        distinct_token_ids_lst:list[TokenId] = []
+        for output in outputs:
+            for token in output.tokens:
+                if distinct_token_ids_lst.count(token.token_id) == 0:
+                    distinct_token_ids_lst.append(token.token_id)
+
+        return AppTx(inputs, 
+            [to_data_input(i) for i in self.data_inputs],
+            outputs,
+            distinct_token_ids_lst,
+            self.change_map
+        )
