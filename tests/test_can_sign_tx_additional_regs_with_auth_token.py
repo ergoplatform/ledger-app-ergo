@@ -7,6 +7,7 @@ from application_client.ergo_command_sender import ErgoCommandSender, StxState
 from helpers.data import ADDRESS_0, ADDRESS_1, CHANGE_ADDRESS, NETWORK, AUTH_TOKEN
 from helpers.tx_builder import TxBuilder
 from helpers.nav_helper import confirm_approve
+from helpers.core import verify_signatures
 
 def test_can_sign_tx_additional_regs_with_auth_token(device: Device, backend: BackendInterface, scenario_navigator: NavigateWithScenario, navigator: Navigator) -> None:
     FROM    = ADDRESS_0
@@ -36,6 +37,10 @@ def test_can_sign_tx_additional_regs_with_auth_token(device: Device, backend: Ba
     client = ErgoCommandSender(backend)
     
     for nb in client.sign_tx_flow(tx.app_tx, NETWORK.__int__(), AUTH_TOKEN):
+        if isinstance(nb, list):
+            assert len(nb) == 1
+            assert verify_signatures(tx.ergo_tx, nb, FROM.address)
+            
         if nb == StxState.ATTEST:
             confirm_approve(device, backend, navigator)
             

@@ -444,7 +444,7 @@ class ErgoCommandSender:
         yield res
 
 
-    def sign_tx_flow(self, tx: AppTx, network: int, token: int | None = None) -> Generator[StxState, None, None]:
+    def sign_tx_flow(self, tx: AppTx, network: int, token: int | None = None) -> Generator[StxState | list[bytes], None, None]:
         if len(tx.inputs) == 0:
             raise ValueError("inputs is empty")        
 
@@ -479,7 +479,7 @@ class ErgoCommandSender:
         for input in tx.inputs:
             sign_bytes.append(signatures[input.sign_path])
 
-        return sign_bytes
+        yield sign_bytes
     
     def send_data(self, cla: int, ins: int, p1: int, p2: int, data: bytes) -> list[RAPDU | None]:
         responses: list[RAPDU | None] = []

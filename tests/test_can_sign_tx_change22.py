@@ -1,3 +1,4 @@
+from helpers.core import verify_signatures
 from ledgered.devices import Device
 from ragger.backend.interface import BackendInterface
 from ragger.navigator.navigation_scenario import NavigateWithScenario, Navigator, Device
@@ -23,6 +24,10 @@ def test_can_sign_tx_change22(device: Device, backend: BackendInterface, scenari
     client = ErgoCommandSender(backend)
     
     for nb in client.sign_tx_flow(tx.app_tx, NETWORK.__int__()):
+        if isinstance(nb, list):
+            assert len(nb) == 1
+            assert verify_signatures(tx.ergo_tx, nb, FROM.address)
+
         if nb == StxState.ATTEST:
             confirm_approve(device, backend, navigator)
             
