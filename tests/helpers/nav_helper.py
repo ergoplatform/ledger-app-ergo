@@ -15,14 +15,6 @@ def enable_blind_signing(device: Device, navigator: Navigator):
             # enable blind signing
             NavInsID.BOTH_CLICK,
             NavInsID.RIGHT_CLICK,
-            NavInsID.BOTH_CLICK,
-            # about
-            NavInsID.RIGHT_CLICK,
-            NavInsID.RIGHT_CLICK,
-            NavInsID.BOTH_CLICK,
-            NavInsID.RIGHT_CLICK,
-            NavInsID.RIGHT_CLICK,
-            # return to main menu
             NavInsID.BOTH_CLICK
         ]
     else:
@@ -31,8 +23,6 @@ def enable_blind_signing(device: Device, navigator: Navigator):
             NavInsID.USE_CASE_HOME_SETTINGS,
             # enable blind signing
             NavIns(NavInsID.TOUCH, positions.POSITIONS["ChoiceList"][device.type][1]),
-            # about
-            NavIns(NavInsID.TOUCH, positions.POSITIONS["UseCaseSettings"][device.type]["next"]),
             # return to main menu
             NavInsID.USE_CASE_SETTINGS_MULTI_PAGE_EXIT
         ]
