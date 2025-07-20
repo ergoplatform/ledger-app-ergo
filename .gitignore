@@ -6,6 +6,9 @@ debug/
 # Speculos related
 *_nvram.bin*
 
+# Temporary
+tests_legacy
+
 # Unit tests and code coverage
 unit-tests/build/
 unit-tests/coverage/
@@ -29,3 +32,5 @@ __pycache__/
 # Doxygen
 doc/html
 doc/latex
+
+tests/snapshots-tmp

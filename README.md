@@ -44,7 +44,7 @@ The flow processed in [GitHub Actions](https://github.com/features/actions) is t
 - Code formatting with [clang-format](http://clang.llvm.org/docs/ClangFormat.html)
 - Compilation of the application for Ledger Nano S+ in [ledger-app-builder](https://github.com/LedgerHQ/ledger-app-builder)
 - Unit tests of C functions with [cmocka](https://cmocka.org/) (see [unit-tests/](unit-tests/))
-- End-to-end tests with [Speculos](https://github.com/LedgerHQ/speculos) emulator (see [tests/](tests/))
+- Functional tests implemented with [Ragger](https://github.com/LedgerHQ/ragger) (see [tests/](tests/))
 - Code coverage with [gcov](https://gcc.gnu.org/onlinedocs/gcc/Gcov.html)/[lcov](http://ltp.sourceforge.net/coverage/lcov.php) and upload to [codecov.io](https://about.codecov.io)
 - Documentation generation with [doxygen](https://www.doxygen.nl)
 
