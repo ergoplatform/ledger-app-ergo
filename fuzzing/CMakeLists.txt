@@ -105,6 +105,9 @@ file(GLOB SHIMS_SRC ${ERGO_PATH}/unit-tests/utils/*.c)
 
 include_directories(
     ${BOLOS_SDK}/include
+    # TO-DO: uncomment when code patched for revamped IO
+    #${BOLOS_SDK}/io/include
+    #${BOLOS_SDK}/io_legacy/include
     ${BOLOS_SDK}/target/nanox/include
     ${BOLOS_SDK}/lib_cxng/include
     ${BOLOS_SDK}/lib_bagl/include
@@ -141,6 +144,7 @@ add_compile_definitions(
     IO_HID_EP_LENGTH=64
     IO_SEPROXYHAL_BUFFER_SIZE_B=300
     OS_IO_SEPROXYHAL
+    OS_IO_SEPH_BUFFER_SIZE=272
 
     HAVE_ECC
     HAVE_CRC
