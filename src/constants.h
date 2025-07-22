@@ -38,7 +38,13 @@
 /**
  * Maximum number of tokens in TX.
  */
-#define TOKEN_MAX_COUNT 124
+#if defined(TARGET_NANOS2)
+    #define TOKEN_MAX_COUNT 124
+#elif defined(TARGET_NANOX)
+    #define TOKEN_MAX_COUNT 100
+#else
+    #define TOKEN_MAX_COUNT 114
+#endif
 
 /**
  * Length of Session Key.
