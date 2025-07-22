@@ -39,11 +39,11 @@
  * Maximum number of tokens in TX.
  */
 #if defined(TARGET_NANOS2)
-    #define TOKEN_MAX_COUNT 124
+#define TOKEN_MAX_COUNT 124
 #elif defined(TARGET_NANOX)
-    #define TOKEN_MAX_COUNT 100
+#define TOKEN_MAX_COUNT 100
 #else
-    #define TOKEN_MAX_COUNT 114
+#define TOKEN_MAX_COUNT 114
 #endif
 
 /**
